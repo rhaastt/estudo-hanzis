@@ -1,4 +1,4 @@
-import { hanziList } from './data.js';
+import { categories, hanziList } from './data.js';
 
 const container = document.getElementById('quizContainer');
 
@@ -8,7 +8,12 @@ const state = {
   current: 0,
   score: 0,
   answered: false,
+  category: 'all',
+  count: 10,
 };
+
+const COUNT_OPTIONS = [5, 10, 20, 'all'];
+const COUNT_LABELS  = { 5: '5', 10: '10', 20: '20', all: 'Todos' };
 
 function shuffle(arr) {
   const a = [...arr];
@@ -20,7 +25,14 @@ function shuffle(arr) {
 }
 
 function buildQuestions(mode) {
-  return shuffle([...hanziList]).map(item => {
+  let pool = state.category === 'all'
+    ? [...hanziList]
+    : hanziList.filter(h => h.category === state.category);
+
+  pool = shuffle(pool);
+  if (state.count !== 'all') pool = pool.slice(0, state.count);
+
+  return pool.map(item => {
     let questionText, qClass, qSub, getVal, optClass;
 
     if (mode === 'hanzi-to-trans') {
@@ -57,6 +69,22 @@ function renderModeSelector() {
   container.innerHTML = `
     <div class="quiz-modes">
       <h2 class="quiz-modes-title">Escolha o modo</h2>
+
+      <div class="quiz-settings">
+        <div class="quiz-settings-row">
+          <span class="quiz-settings-label">Categoria</span>
+          <select class="quiz-cat-select" id="quizCatSelect">
+            ${categories.map(c => `<option value="${c.id}"${c.id === state.category ? ' selected' : ''}>${c.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="quiz-settings-row">
+          <span class="quiz-settings-label">Perguntas</span>
+          <div class="quiz-count-btns">
+            ${COUNT_OPTIONS.map(n => `<button class="quiz-count-btn${n === state.count ? ' active' : ''}" data-count="${n}">${COUNT_LABELS[n]}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+
       <div class="quiz-modes-grid">
         <button class="quiz-mode-card" data-mode="hanzi-to-trans">
           <div class="quiz-mode-glyph">汉</div>
@@ -76,6 +104,19 @@ function renderModeSelector() {
       </div>
     </div>
   `.trim();
+
+  document.getElementById('quizCatSelect').addEventListener('change', e => {
+    state.category = e.target.value;
+  });
+
+  container.querySelectorAll('.quiz-count-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.count;
+      state.count = val === 'all' ? 'all' : +val;
+      container.querySelectorAll('.quiz-count-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    })
+  );
 
   container.querySelectorAll('.quiz-mode-card').forEach(btn =>
     btn.addEventListener('click', () => startQuiz(btn.dataset.mode))
