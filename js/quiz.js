@@ -71,9 +71,15 @@ function poolSize() {
 }
 
 function updateCountButtons(available) {
+  if (state.count !== 'all' && state.count > available) {
+    state.count = 'all';
+  }
+
   container.querySelectorAll('.quiz-count-btn').forEach(btn => {
-    const n = btn.dataset.count === 'all' ? 0 : +btn.dataset.count;
+    const val = btn.dataset.count;
+    const n   = val === 'all' ? 0 : +val;
     btn.classList.toggle('quiz-count-btn--dim', n > available);
+    btn.classList.toggle('active', val === String(state.count));
   });
 
   const hint = container.querySelector('#quizAvailableHint');
