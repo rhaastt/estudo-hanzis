@@ -249,6 +249,7 @@ function renderQuestion() {
         `).join('')}
       </div>
       <div class="quiz-foot">
+        <button class="quiz-quit" id="quizQuit">Encerrar</button>
         <button class="quiz-next" id="quizNext" disabled>
           ${state.current < total - 1 ? 'Próxima' : 'Ver resultado'}
         </button>
@@ -260,6 +261,10 @@ function renderQuestion() {
     btn.addEventListener('click', () => handleAnswer(+btn.dataset.idx))
   );
   document.getElementById('quizNext').addEventListener('click', advance);
+  document.getElementById('quizQuit').addEventListener('click', () => {
+    const answered = state.answered ? state.current + 1 : state.current;
+    renderResult(answered);
+  });
 }
 
 function handleAnswer(idx) {
@@ -288,16 +293,18 @@ function advance() {
 }
 
 // ── RESULT ───────────────────────────────────────────────────────
-function renderResult() {
-  const total = state.questions.length;
-  const pct   = Math.round((state.score / total) * 100);
-  const msg   = pct >= 80 ? 'Excelente!' : pct >= 60 ? 'Bom trabalho!' : 'Continue praticando!';
+function renderResult(answeredTotal = state.questions.length) {
+  const total   = answeredTotal;
+  const early   = total < state.questions.length;
+  const pct     = total > 0 ? Math.round((state.score / total) * 100) : 0;
+  const msg     = total === 0 ? 'Quiz encerrado'
+    : pct >= 80 ? 'Excelente!' : pct >= 60 ? 'Bom trabalho!' : 'Continue praticando!';
 
   container.innerHTML = `
     <div class="quiz-result">
       <div class="quiz-result-pct">${pct}%</div>
       <h2 class="quiz-result-msg">${msg}</h2>
-      <p class="quiz-result-detail">${state.score} de ${total} corretas</p>
+      <p class="quiz-result-detail">${state.score} de ${total} corretas${early ? ` <span class="quiz-result-early">(encerrado na ${total + 1}ª pergunta)</span>` : ''}</p>
       <button class="btn-reset" id="quizRestart">Reiniciar quiz</button>
     </div>
   `.trim();
