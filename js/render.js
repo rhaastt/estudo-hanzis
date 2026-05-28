@@ -8,6 +8,7 @@ const BLOCK_LABEL  = ['neutro', '1º', '2º', '3º', '4º'];
 export function createGuideGroup(category, items) {
   const group = document.createElement('div');
   group.className = 'group';
+  group.dataset.cat = category.id;
 
   const header = document.createElement('div');
   header.className = 'group-header';
@@ -95,6 +96,7 @@ export function createFilterButton(category, isActive) {
 export function createToneSummary() {
   const group = document.createElement('div');
   group.className = 'group';
+  group.dataset.cat = 'tone-summary';
   group.innerHTML = `
     <div class="group-header">
       <div class="group-dot"></div>

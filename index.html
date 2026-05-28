@@ -12,12 +12,13 @@
 
 <header class="hero">
   <h1>Hanzis<br><em>Essenciais</em></h1>
-  <p>27 caracteres · Guia de estudo + Flash Cards interativos</p>
+  <p>72 caracteres · Guia de estudo + Flash Cards interativos</p>
 </header>
 
 <div class="tabs" id="tabsContainer">
   <button class="tab-btn active" data-tab="guia">Guia de Estudo</button>
   <button class="tab-btn" data-tab="flashcards">Flash Cards</button>
+  <button class="tab-btn" data-tab="quiz">Quiz</button>
 </div>
 
 <div id="guia" class="section active">
@@ -41,10 +42,15 @@
   </div>
 </div>
 
+<div id="quiz" class="section">
+  <div class="quiz-wrap" id="quizContainer"></div>
+</div>
+
 <footer>
-  27 hanzis · nível iniciante · mandarin essentials
+  72 hanzis · nível iniciante · mandarin essentials
 </footer>
 
 <script type="module" src="js/app.js"></script>
+<script type="module" src="js/quiz.js"></script>
 </body>
 </html>
