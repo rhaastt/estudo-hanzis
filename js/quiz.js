@@ -8,9 +8,27 @@ const state = {
   current: 0,
   score: 0,
   answered: false,
-  category: 'all',
+  categories: [],  // empty = Todos
   count: 10,
 };
+
+function saveSettings() {
+  localStorage.setItem('quiz-settings', JSON.stringify({ categories: state.categories, count: state.count }));
+}
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('quiz-settings'));
+    if (!saved) return;
+    const validIds = new Set(categories.map(c => c.id));
+    if (Array.isArray(saved.categories)) {
+      state.categories = saved.categories.filter(id => validIds.has(id) && id !== 'all');
+    }
+    if (saved.count === 'all' || COUNT_OPTIONS.includes(saved.count)) {
+      state.count = saved.count;
+    }
+  } catch {}
+}
 
 const COUNT_OPTIONS = [5, 10, 20, 'all'];
 const COUNT_LABELS  = { 5: '5', 10: '10', 20: '20', all: 'Todos' };
@@ -24,12 +42,14 @@ function shuffle(arr) {
   return a;
 }
 
-function buildQuestions(mode) {
-  let pool = state.category === 'all'
+function activePool() {
+  return state.categories.length === 0
     ? [...hanziList]
-    : hanziList.filter(h => h.category === state.category);
+    : hanziList.filter(h => state.categories.includes(h.category));
+}
 
-  pool = shuffle(pool);
+function buildQuestions(mode) {
+  let pool = shuffle(activePool());
   if (state.count !== 'all') pool = pool.slice(0, state.count);
 
   return pool.map(item => {
@@ -64,23 +84,67 @@ function buildQuestions(mode) {
   });
 }
 
+function poolSize() {
+  return activePool().length;
+}
+
+function updateCountButtons(available) {
+  if (state.count !== 'all' && state.count > available) {
+    state.count = 'all';
+    saveSettings();
+  }
+
+  container.querySelectorAll('.quiz-count-btn').forEach(btn => {
+    const val = btn.dataset.count;
+    const n   = val === 'all' ? 0 : +val;
+    btn.classList.toggle('quiz-count-btn--dim', n > available);
+    btn.classList.toggle('active', val === String(state.count));
+  });
+
+  const hint = container.querySelector('#quizAvailableHint');
+  if (hint) hint.textContent = `${available} disponível${available !== 1 ? 's' : ''}`;
+
+  container.querySelectorAll('.quiz-mode-card').forEach(card => {
+    card.disabled = available === 0;
+    card.classList.toggle('quiz-mode-card--empty', available === 0);
+  });
+}
+
 // ── MODE SELECTOR ────────────────────────────────────────────────
+function updateCatPills() {
+  container.querySelectorAll('.quiz-cat-pill').forEach(btn => {
+    const cat = btn.dataset.cat;
+    btn.classList.toggle('active',
+      cat === 'all' ? state.categories.length === 0 : state.categories.includes(cat)
+    );
+  });
+}
+
 function renderModeSelector() {
+  const catItemCount = Object.fromEntries(
+    categories.map(c => [c.id, c.id === 'all' ? hanziList.length : hanziList.filter(h => h.category === c.id).length])
+  );
+  const specificCats = categories.filter(c => c.id !== 'all' && catItemCount[c.id] > 0);
+
   container.innerHTML = `
     <div class="quiz-modes">
       <h2 class="quiz-modes-title">Escolha o modo</h2>
 
       <div class="quiz-settings">
-        <div class="quiz-settings-row">
+        <div class="quiz-settings-row quiz-settings-row--top">
           <span class="quiz-settings-label">Categoria</span>
-          <select class="quiz-cat-select" id="quizCatSelect">
-            ${categories.map(c => `<option value="${c.id}"${c.id === state.category ? ' selected' : ''}>${c.label}</option>`).join('')}
-          </select>
+          <div class="quiz-cat-pills">
+            <button class="quiz-cat-pill${state.categories.length === 0 ? ' active' : ''}" data-cat="all">Todos</button>
+            ${specificCats.map(c => `<button class="quiz-cat-pill${state.categories.includes(c.id) ? ' active' : ''}" data-cat="${c.id}">${c.label} <span class="quiz-cat-pill-count">${catItemCount[c.id]}</span></button>`).join('')}
+          </div>
         </div>
         <div class="quiz-settings-row">
           <span class="quiz-settings-label">Perguntas</span>
-          <div class="quiz-count-btns">
-            ${COUNT_OPTIONS.map(n => `<button class="quiz-count-btn${n === state.count ? ' active' : ''}" data-count="${n}">${COUNT_LABELS[n]}</button>`).join('')}
+          <div class="quiz-count-group">
+            <div class="quiz-count-btns">
+              ${COUNT_OPTIONS.map(n => `<button class="quiz-count-btn${n === state.count ? ' active' : ''}" data-count="${n}">${COUNT_LABELS[n]}</button>`).join('')}
+            </div>
+            <span class="quiz-available-hint" id="quizAvailableHint"></span>
           </div>
         </div>
       </div>
@@ -105,9 +169,26 @@ function renderModeSelector() {
     </div>
   `.trim();
 
-  document.getElementById('quizCatSelect').addEventListener('change', e => {
-    state.category = e.target.value;
-  });
+  container.querySelectorAll('.quiz-cat-pill').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      const allIds = specificCats.map(c => c.id);
+      if (cat === 'all') {
+        state.categories = [];
+      } else if (state.categories.includes(cat)) {
+        const next = state.categories.filter(c => c !== cat);
+        // deselecting last specific → treat as Todos
+        state.categories = next;
+      } else {
+        const next = [...state.categories, cat];
+        // all specific selected → snap to Todos
+        state.categories = allIds.every(id => next.includes(id)) ? [] : next;
+      }
+      updateCatPills();
+      updateCountButtons(poolSize());
+      saveSettings();
+    })
+  );
 
   container.querySelectorAll('.quiz-count-btn').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -115,12 +196,15 @@ function renderModeSelector() {
       state.count = val === 'all' ? 'all' : +val;
       container.querySelectorAll('.quiz-count-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      saveSettings();
     })
   );
 
   container.querySelectorAll('.quiz-mode-card').forEach(btn =>
     btn.addEventListener('click', () => startQuiz(btn.dataset.mode))
   );
+
+  updateCountButtons(poolSize());
 }
 
 // ── QUESTION ─────────────────────────────────────────────────────
@@ -224,4 +308,5 @@ function renderResult() {
   });
 }
 
+loadSettings();
 renderModeSelector();
