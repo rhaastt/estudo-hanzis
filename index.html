@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Guia de Estudo — Hanzis Essenciais</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <h1>Hanzis<br><em>Essenciais</em></h1>
+  <p>27 caracteres · Guia de estudo + Flash Cards interativos</p>
+</header>
+
+<div class="tabs" id="tabsContainer">
+  <button class="tab-btn active" data-tab="guia">Guia de Estudo</button>
+  <button class="tab-btn" data-tab="flashcards">Flash Cards</button>
+</div>
+
+<div id="guia" class="section active">
+  <div class="guide-wrap" id="guideContainer"></div>
+</div>
+
+<div id="flashcards" class="section">
+  <div class="flashcards-wrap">
+    <div class="fc-progress-bar">
+      <div class="fc-progress-fill" id="progressFill"></div>
+    </div>
+    <div class="fc-meta">
+      <span class="fc-counter" id="fcCounter">0 / 0 virados</span>
+      <div class="fc-filter" id="filterContainer"></div>
+    </div>
+    <div class="fc-grid" id="fcGrid"></div>
+    <div id="sentinel"></div>
+    <div class="fc-reset-wrap">
+      <button class="btn-reset" id="resetBtn">Reiniciar todos os cards</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  27 hanzis · nível iniciante · mandarin essentials
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
