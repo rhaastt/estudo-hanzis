@@ -77,10 +77,15 @@ function buildQuestions(mode) {
     }
 
     const correctAnswer = getVal(item);
-    const wrongPool     = shuffle(hanziList.filter(h => h.id !== item.id && getVal(h) !== correctAnswer));
-    const options       = shuffle([correctAnswer, ...wrongPool.slice(0, 3).map(getVal)]);
+    const wrongItems    = shuffle(hanziList.filter(h => h.id !== item.id && getVal(h) !== correctAnswer)).slice(0, 3);
+    const allPairs      = shuffle([
+      { value: correctAnswer, src: item },
+      ...wrongItems.map(wi => ({ value: getVal(wi), src: wi })),
+    ]);
+    const options     = allPairs.map(p => p.value);
+    const optionItems = allPairs.map(p => p.src);
 
-    return { questionText, qClass, qSub, options, optClass, correctIndex: options.indexOf(correctAnswer) };
+    return { questionText, qClass, qSub, options, optionItems, optClass, correctIndex: options.indexOf(correctAnswer) };
   });
 }
 
@@ -244,9 +249,20 @@ function renderQuestion() {
         ${q.qSub ? `<p class="quiz-q-sub">${q.qSub}</p>` : ''}
       </div>
       <div class="quiz-opts">
-        ${q.options.map((opt, i) => `
-          <button class="quiz-opt ${q.optClass}" data-idx="${i}">${opt}</button>
-        `).join('')}
+        ${q.options.map((opt, i) => {
+          const src = q.optionItems[i];
+          return `
+            <div class="quiz-opt-card${q.optClass ? ` ${q.optClass}` : ''}" data-idx="${i}">
+              <div class="quiz-opt-inner">
+                <div class="quiz-opt-front">${opt}</div>
+                <div class="quiz-opt-back">
+                  <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
+                  <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
+                  <div class="quiz-opt-back-trans">${src.fcTranslation ?? src.translation}</div>
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
       </div>
       <div class="quiz-foot">
         <button class="quiz-quit" id="quizQuit">Encerrar</button>
@@ -257,8 +273,8 @@ function renderQuestion() {
     </div>
   `.trim();
 
-  container.querySelectorAll('.quiz-opt').forEach(btn =>
-    btn.addEventListener('click', () => handleAnswer(+btn.dataset.idx))
+  container.querySelectorAll('.quiz-opt-card').forEach(card =>
+    card.addEventListener('click', () => handleAnswer(+card.dataset.idx))
   );
   document.getElementById('quizNext').addEventListener('click', advance);
   document.getElementById('quizQuit').addEventListener('click', () => {
@@ -274,10 +290,11 @@ function handleAnswer(idx) {
   const q = state.questions[state.current];
   if (idx === q.correctIndex) state.score++;
 
-  container.querySelectorAll('.quiz-opt').forEach((btn, i) => {
-    btn.disabled = true;
-    if (i === q.correctIndex)                  btn.classList.add('quiz-opt-correct');
-    if (i === idx && idx !== q.correctIndex)   btn.classList.add('quiz-opt-wrong');
+  container.querySelectorAll('.quiz-opt-card').forEach((card, i) => {
+    card.style.pointerEvents = 'none';
+    if (i === q.correctIndex)                card.classList.add('quiz-opt-correct');
+    if (i === idx && idx !== q.correctIndex) card.classList.add('quiz-opt-wrong');
+    card.classList.add('flipped');
   });
 
   document.getElementById('quizNext').disabled = false;
