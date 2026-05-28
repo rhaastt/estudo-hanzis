@@ -64,8 +64,34 @@ function buildQuestions(mode) {
   });
 }
 
+function poolSize() {
+  return state.category === 'all'
+    ? hanziList.length
+    : hanziList.filter(h => h.category === state.category).length;
+}
+
+function updateCountButtons(available) {
+  container.querySelectorAll('.quiz-count-btn').forEach(btn => {
+    const n = btn.dataset.count === 'all' ? 0 : +btn.dataset.count;
+    btn.classList.toggle('quiz-count-btn--dim', n > available);
+  });
+
+  const hint = container.querySelector('#quizAvailableHint');
+  if (hint) hint.textContent = `${available} disponível${available !== 1 ? 's' : ''}`;
+
+  container.querySelectorAll('.quiz-mode-card').forEach(card => {
+    card.disabled = available === 0;
+    card.classList.toggle('quiz-mode-card--empty', available === 0);
+  });
+}
+
 // ── MODE SELECTOR ────────────────────────────────────────────────
 function renderModeSelector() {
+  const catItemCount = Object.fromEntries(
+    categories.map(c => [c.id, c.id === 'all' ? hanziList.length : hanziList.filter(h => h.category === c.id).length])
+  );
+  const visibleCats = categories.filter(c => catItemCount[c.id] > 0);
+
   container.innerHTML = `
     <div class="quiz-modes">
       <h2 class="quiz-modes-title">Escolha o modo</h2>
@@ -74,13 +100,16 @@ function renderModeSelector() {
         <div class="quiz-settings-row">
           <span class="quiz-settings-label">Categoria</span>
           <select class="quiz-cat-select" id="quizCatSelect">
-            ${categories.map(c => `<option value="${c.id}"${c.id === state.category ? ' selected' : ''}>${c.label}</option>`).join('')}
+            ${visibleCats.map(c => `<option value="${c.id}"${c.id === state.category ? ' selected' : ''}>${c.label} (${catItemCount[c.id]})</option>`).join('')}
           </select>
         </div>
         <div class="quiz-settings-row">
           <span class="quiz-settings-label">Perguntas</span>
-          <div class="quiz-count-btns">
-            ${COUNT_OPTIONS.map(n => `<button class="quiz-count-btn${n === state.count ? ' active' : ''}" data-count="${n}">${COUNT_LABELS[n]}</button>`).join('')}
+          <div class="quiz-count-group">
+            <div class="quiz-count-btns">
+              ${COUNT_OPTIONS.map(n => `<button class="quiz-count-btn${n === state.count ? ' active' : ''}" data-count="${n}">${COUNT_LABELS[n]}</button>`).join('')}
+            </div>
+            <span class="quiz-available-hint" id="quizAvailableHint"></span>
           </div>
         </div>
       </div>
@@ -107,6 +136,7 @@ function renderModeSelector() {
 
   document.getElementById('quizCatSelect').addEventListener('change', e => {
     state.category = e.target.value;
+    updateCountButtons(poolSize());
   });
 
   container.querySelectorAll('.quiz-count-btn').forEach(btn =>
@@ -121,6 +151,8 @@ function renderModeSelector() {
   container.querySelectorAll('.quiz-mode-card').forEach(btn =>
     btn.addEventListener('click', () => startQuiz(btn.dataset.mode))
   );
+
+  updateCountButtons(poolSize());
 }
 
 // ── QUESTION ─────────────────────────────────────────────────────

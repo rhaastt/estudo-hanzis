@@ -667,6 +667,32 @@
     color: white;
   }
 
+  .quiz-count-btn--dim {
+    opacity: 0.38;
+    border-style: dashed;
+  }
+
+  .quiz-count-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .quiz-available-hint {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtle);
+  }
+
+  .quiz-mode-card--empty {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   .quiz-modes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
