@@ -1,4 +1,5 @@
 import { categories, hanziList } from './data.js';
+import { countryList } from './countries.js';
 import {
   createGuideGroup,
   createFlashCard,
@@ -24,6 +25,7 @@ const progressFill    = document.getElementById('progressFill');
 const fcCounter       = document.getElementById('fcCounter');
 const resetBtn        = document.getElementById('resetBtn');
 const tabsContainer   = document.getElementById('tabsContainer');
+const paisesContainer = document.getElementById('paisesContainer');
 
 // ── VALIDATION ────────────────────────────────────────────────
 function validate() {
@@ -161,6 +163,34 @@ resetBtn.addEventListener('click', () => {
   updateProgress();
 });
 
+// ── PAÍSES ───────────────────────────────────────────────────
+function renderCountries() {
+  const grid = document.createElement('div');
+  grid.className = 'country-grid';
+
+  for (const c of countryList) {
+    const card = document.createElement('div');
+    card.className = 'country-card';
+    card.innerHTML = `
+      <div class="country-inner">
+        <div class="country-front">
+          <img class="country-flag" src="${c.flag}" alt="Bandeira de ${c.name}" loading="lazy">
+          <span class="country-name">${c.name}</span>
+        </div>
+        <div class="country-back">
+          <div class="country-hanzi">${c.hanzi}</div>
+          <div class="country-pinyin">${c.pinyin}</div>
+          <div class="country-name-back">${c.name}</div>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => card.classList.toggle('flipped'));
+    grid.appendChild(card);
+  }
+
+  paisesContainer.appendChild(grid);
+}
+
 // ── INIT ─────────────────────────────────────────────────────
 function init() {
   validate();
@@ -170,6 +200,7 @@ function init() {
   renderBatch();
   updateProgress();
   activateObserver();
+  renderCountries();
 }
 
 init();
