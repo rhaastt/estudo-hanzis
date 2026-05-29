@@ -1,3 +1,5 @@
+import { countryList } from './countries.js';
+
 export const categories = [
   { id: 'all', label: 'Todos' },
   {
@@ -61,6 +63,7 @@ export const categories = [
     guideLastCol: 'Origem',
   },
   { id: 'conectivo', label: 'Conectivos' },
+  { id: 'pais', label: 'Países' },
 ];
 
 export const hanziList = [
@@ -710,4 +713,15 @@ export const hanziList = [
     mnemonic: '东方 (oriente, "direção leste") + 学院 (instituto) — nome semântico.',
     examples: [{ zh: '东方学院', pt: 'Instituto de Estudos Orientais' }],
   },
+
+  ...countryList.map(c => ({
+    id: c.id,
+    hanzi: c.hanzi,
+    pinyin: c.pinyin,
+    tone: 0,
+    category: 'pais',
+    categoryLabel: 'País',
+    translation: c.name,
+    fcTranslation: c.name,
+  })),
 ];

@@ -45,7 +45,7 @@ function validate() {
 function renderGuide() {
   guideContainer.innerHTML = '';
   for (const cat of categories) {
-    if (cat.id === 'all') continue;
+    if (cat.id === 'all' || cat.id === 'pais') continue;
     const items = hanziList.filter(h => h.category === cat.id);
     if (items.length === 0) continue;
     guideContainer.appendChild(createGuideGroup(cat, items));
@@ -53,10 +53,36 @@ function renderGuide() {
   guideContainer.appendChild(createToneSummary());
 }
 
+// ── HANZI WRITER ─────────────────────────────────────────────
+const CAT_COLOR = {
+  pronome: '#4070C0', verbo: '#B04040', adverbio: '#307A40',
+  particula: '#A06020', substantivo: '#7040B0', adjetivo: '#8A6000',
+  numero: '#3A5080', lingua: '#A04090', interrogativo: '#207860',
+  'nome-proprio': '#8A2A30', conectivo: '#808000',
+};
+
+function initHanziWriters() {
+  if (typeof HanziWriter === 'undefined') return;
+  fcGrid.querySelectorAll('.fc-hw-target:not([data-hw-initialized])').forEach(el => {
+    const cat = el.closest('.fc-item')?.dataset.cat ?? '';
+    HanziWriter.create(el, el.dataset.hw, {
+      width: 90,
+      height: 90,
+      padding: 5,
+      strokeColor: CAT_COLOR[cat] ?? '#333',
+      outlineColor: 'rgba(0,0,0,0.12)',
+      showCharacter: true,
+      showOutline: true,
+    });
+    el.dataset.hwInitialized = '1';
+  });
+}
+
 // ── FILTER BUTTONS ────────────────────────────────────────────
 function renderFilters() {
   filterContainer.innerHTML = '';
   for (const cat of categories) {
+    if (cat.id === 'pais') continue;
     const btn = createFilterButton(cat, cat.id === state.activeFilter);
     filterContainer.appendChild(btn);
   }
@@ -74,6 +100,7 @@ function renderBatch() {
     fcGrid.appendChild(card);
   }
   state.renderedCount += slice.length;
+  initHanziWriters();
 }
 
 function activateObserver() {
@@ -132,7 +159,7 @@ filterContainer.addEventListener('click', e => {
   // filter change resets flip state
   state.flippedIds.clear();
   state.filteredItems = state.activeFilter === 'all'
-    ? [...hanziList]
+    ? hanziList.filter(h => h.category !== 'pais')
     : hanziList.filter(h => h.category === state.activeFilter);
   state.renderedCount = 0;
 
@@ -196,7 +223,7 @@ function init() {
   validate();
   renderFilters();
   renderGuide();
-  state.filteredItems = [...hanziList];
+  state.filteredItems = hanziList.filter(h => h.category !== 'pais');
   renderBatch();
   updateProgress();
   activateObserver();
