@@ -33,7 +33,7 @@
     </div>
     <div class="fc-search">
       <i data-lucide="search" class="fc-search-icon"></i>
-      <input type="search" id="fcSearch" placeholder="Buscar hanzi, pinyin ou tradução…" autocomplete="off">
+      <input type="search" id="fcSearch" placeholder="Buscar em todo o app…  (Ctrl K)" autocomplete="off" readonly>
     </div>
     <div class="fc-meta">
       <span class="fc-counter" id="fcCounter">0 / 0 virados</span>
@@ -58,6 +58,22 @@
 <footer>
   72 hanzis · nível iniciante · mandarin essentials
 </footer>
+
+<div class="cmdk" id="cmdk" hidden>
+  <div class="cmdk-backdrop" data-cmdk-close></div>
+  <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Busca global">
+    <div class="cmdk-input-row">
+      <i data-lucide="search" class="cmdk-input-icon"></i>
+      <input type="search" id="cmdkInput" placeholder="Buscar hanzi, pinyin, tradução, país…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <kbd class="cmdk-esc">esc</kbd>
+    </div>
+    <div class="cmdk-results" id="cmdkResults"></div>
+    <div class="cmdk-footer">
+      <span><kbd>enter</kbd> abrir</span>
+      <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
+    </div>
+  </div>
+</div>
 
 <div class="hw-modal" id="hwModal" hidden>
   <div class="hw-modal-backdrop" data-hw-close></div>
