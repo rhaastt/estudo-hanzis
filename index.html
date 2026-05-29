@@ -59,6 +59,23 @@
   72 hanzis · nível iniciante · mandarin essentials
 </footer>
 
+<div class="hw-modal" id="hwModal" hidden>
+  <div class="hw-modal-backdrop" data-hw-close></div>
+  <div class="hw-modal-card" role="dialog" aria-modal="true" aria-labelledby="hwModalHanzi">
+    <button class="hw-modal-close" type="button" data-hw-close aria-label="Fechar">
+      <i data-lucide="x"></i>
+    </button>
+    <div class="hw-modal-pinyin" id="hwModalPinyin"></div>
+    <div class="hw-modal-canvas" id="hwModalCanvas"></div>
+    <div class="hw-modal-translation" id="hwModalTranslation"></div>
+    <div class="hw-modal-hint" id="hwModalHint"></div>
+    <div class="hw-modal-actions">
+      <button class="hw-btn" type="button" id="hwAnimate"><i data-lucide="play"></i> Animar</button>
+      <button class="hw-btn" type="button" id="hwPractice"><i data-lucide="pencil"></i> Praticar</button>
+    </div>
+  </div>
+</div>
+
 <nav class="mobile-nav" id="mobileNav">
   <button class="mobile-nav-btn active" data-tab="guia">
     <i data-lucide="book-open"></i>

@@ -7,6 +7,11 @@ import {
   createCategoryHeader,
   createToneSummary,
 } from './render.js';
+import {
+  createStrokeWriter,
+  animateWriter,
+  startWriterQuiz,
+} from './services/hanzi-writer.js';
 
 const state = {
   activeFilter: 'all',
@@ -35,6 +40,15 @@ const tabsContainer   = document.getElementById('tabsContainer');
 const mobileNav       = document.getElementById('mobileNav');
 const searchInput     = document.getElementById('fcSearch');
 const paisesContainer = document.getElementById('paisesContainer');
+
+// stroke-order modal
+const hwModal            = document.getElementById('hwModal');
+const hwModalCanvas      = document.getElementById('hwModalCanvas');
+const hwModalPinyin      = document.getElementById('hwModalPinyin');
+const hwModalTranslation = document.getElementById('hwModalTranslation');
+const hwModalHint        = document.getElementById('hwModalHint');
+const hwAnimateBtn       = document.getElementById('hwAnimate');
+const hwPracticeBtn      = document.getElementById('hwPractice');
 
 // strip tone diacritics so "ni" matches "nǐ"
 function normalize(str) {
@@ -92,6 +106,60 @@ function initHanziWriters() {
   });
 }
 
+// ── STROKE-ORDER MODAL ───────────────────────────────────────
+let hwWriter = null;
+
+function openHwModal(item) {
+  hwModalPinyin.textContent      = item.pinyin;
+  hwModalTranslation.textContent = item.fcTranslation ?? item.translation;
+  hwModalHint.textContent        = '';
+  hwModalCanvas.innerHTML        = '';
+  hwModal.hidden = false;
+  document.body.classList.add('hw-modal-open');
+
+  hwWriter = createStrokeWriter(hwModalCanvas, item.hanzi, {
+    width: 300, height: 300, padding: 20,
+    strokeColor:  CAT_COLOR[item.category] ?? '#333',
+    outlineColor: 'rgba(0,0,0,0.12)',
+    showCharacter: true,
+    showOutline: true,
+  });
+
+  if (!hwWriter) {
+    hwModalHint.textContent = 'Animação de traços indisponível offline.';
+    return;
+  }
+  animateWriter(hwWriter);
+}
+
+function closeHwModal() {
+  hwModal.hidden = true;
+  document.body.classList.remove('hw-modal-open');
+  hwModalCanvas.innerHTML = '';
+  hwWriter = null;
+}
+
+hwAnimateBtn.addEventListener('click', () => {
+  hwModalHint.textContent = '';
+  animateWriter(hwWriter);
+});
+
+hwPracticeBtn.addEventListener('click', () => {
+  if (!hwWriter) return;
+  hwModalHint.textContent = 'Desenhe o caractere traço a traço.';
+  startWriterQuiz(hwWriter, {
+    onComplete: () => { hwModalHint.textContent = 'Muito bem! ✓'; },
+  });
+});
+
+hwModal.addEventListener('click', e => {
+  if (e.target.closest('[data-hw-close]')) closeHwModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !hwModal.hidden) closeHwModal();
+});
+
 // ── FILTER BUTTONS ────────────────────────────────────────────
 function renderFilters() {
   filterContainer.innerHTML = '';
@@ -121,6 +189,7 @@ function renderBatch() {
   }
   state.renderedCount += slice.length;
   initHanziWriters();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function activateObserver() {
@@ -237,6 +306,15 @@ searchInput.addEventListener('input', () => {
 
 // ── FLIP EVENTS ───────────────────────────────────────────────
 fcGrid.addEventListener('click', e => {
+  // stroke button opens the modal without flipping the card
+  const hwBtn = e.target.closest('.fc-hw-btn');
+  if (hwBtn) {
+    const card = hwBtn.closest('.fc-item');
+    const item = hanziList.find(h => h.id === card?.dataset.id);
+    if (item) openHwModal(item);
+    return;
+  }
+
   const card = e.target.closest('.fc-item');
   if (!card) return;
   const id = card.dataset.id;

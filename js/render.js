@@ -71,6 +71,10 @@ export function createFlashCard(item) {
     ? `<div class="fc-hw-target" data-hw="${item.hanzi}"></div>`
     : `<div class="fc-hanzi">${item.hanzi}</div>`;
 
+  const strokeBtn = isSingle
+    ? `<button class="fc-hw-btn" type="button"><i data-lucide="pen-tool"></i> Ver traços</button>`
+    : '';
+
   card.innerHTML = `
     <div class="fc-inner">
       <div class="fc-front">
@@ -82,6 +86,7 @@ export function createFlashCard(item) {
         <div class="fc-translation">${translation}</div>
         <div class="fc-category-tag">${item.categoryLabel}</div>
         <div class="fc-example">${exText}</div>
+        ${strokeBtn}
       </div>
     </div>
   `.trim();
