@@ -4,6 +4,7 @@ import {
   createGuideGroup,
   createFlashCard,
   createFilterButton,
+  createCategoryHeader,
   createToneSummary,
 } from './render.js';
 
@@ -12,9 +13,14 @@ const state = {
   searchTerm: '',
   filteredItems: [],
   renderedCount: 0,
+  lastRenderedCat: null,
+  catCounts: {},
   flippedIds: new Set(),
   observer: null,
 };
+
+// category id → category object, for headers
+const categoryById = new Map(categories.map(c => [c.id, c]));
 
 const BATCH_SIZE = 24;
 
@@ -98,11 +104,17 @@ function renderFilters() {
 
 // ── LAZY LOAD ─────────────────────────────────────────────────
 function renderBatch() {
+  const grouped = state.activeFilter === 'all';
   const slice = state.filteredItems.slice(
     state.renderedCount,
     state.renderedCount + BATCH_SIZE,
   );
   for (const item of slice) {
+    if (grouped && item.category !== state.lastRenderedCat) {
+      const cat = categoryById.get(item.category);
+      if (cat) fcGrid.appendChild(createCategoryHeader(cat, state.catCounts[item.category] ?? 0));
+      state.lastRenderedCat = item.category;
+    }
     const card = createFlashCard(item);
     if (state.flippedIds.has(item.id)) card.classList.add('flipped');
     fcGrid.appendChild(card);
@@ -162,18 +174,31 @@ mobileNav.addEventListener('click', e => {
 
 // ── FLASH CARD FILTERS (category + search) ───────────────────
 function computeFiltered() {
-  let items = state.activeFilter === 'all'
-    ? hanziList.filter(h => h.category !== 'pais')
-    : hanziList.filter(h => h.category === state.activeFilter);
-
   const term = normalize(state.searchTerm.trim());
-  if (term) {
-    items = items.filter(h =>
-      h.hanzi.includes(state.searchTerm.trim()) ||
+  const matchesSearch = h => {
+    if (!term) return true;
+    return h.hanzi.includes(state.searchTerm.trim()) ||
       normalize(h.pinyin).includes(term) ||
       normalize(h.translation).includes(term) ||
-      normalize(h.fcTranslation).includes(term)
-    );
+      normalize(h.fcTranslation).includes(term);
+  };
+
+  let items;
+  if (state.activeFilter === 'all') {
+    // grouped: walk categories in their defined order so cards cluster by category
+    items = [];
+    for (const cat of categories) {
+      if (cat.id === 'all' || cat.id === 'pais') continue;
+      items.push(...hanziList.filter(h => h.category === cat.id && matchesSearch(h)));
+    }
+  } else {
+    items = hanziList.filter(h => h.category === state.activeFilter && matchesSearch(h));
+  }
+
+  // per-category counts for the section headers
+  state.catCounts = {};
+  for (const h of items) {
+    state.catCounts[h.category] = (state.catCounts[h.category] ?? 0) + 1;
   }
   return items;
 }
@@ -181,6 +206,7 @@ function computeFiltered() {
 function rerenderFlash() {
   state.filteredItems = computeFiltered();
   state.renderedCount = 0;
+  state.lastRenderedCat = null;
   fcGrid.innerHTML = '';
   renderBatch();
   if (state.filteredItems.length === 0) {

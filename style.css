@@ -354,6 +354,31 @@
     gap: 20px;
   }
 
+  .fc-cat-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .fc-cat-header:first-child { margin-top: 0; }
+
+  .fc-cat-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .fc-cat-count {
+    font-size: 13px;
+    color: var(--subtle);
+    white-space: nowrap;
+  }
+
   /* -------- FLIP CARD -------- */
   .fc-item {
     perspective: 1000px;
