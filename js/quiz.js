@@ -2,21 +2,6 @@ import { categories, hanziList } from './data.js';
 
 const container = document.getElementById('quizContainer');
 
-function initQuizHW() {
-  if (typeof HanziWriter === 'undefined') return;
-  container.querySelectorAll('[data-hw]:not([data-hw-initialized])').forEach(el => {
-    const size = el.classList.contains('quiz-q-hw-target') ? 120 : 56;
-    HanziWriter.create(el, el.dataset.hw, {
-      width: size, height: size, padding: 5,
-      strokeColor: '#2D2926',
-      outlineColor: 'rgba(0,0,0,0.12)',
-      showCharacter: true,
-      showOutline: true,
-    });
-    el.dataset.hwInitialized = '1';
-  });
-}
-
 const state = {
   mode: null,
   questions: [],
@@ -104,6 +89,13 @@ function buildQuestions(mode) {
   });
 }
 
+// Stroke mode uses only single-char items — raw items, no options/correctIndex needed
+function buildStrokeQuestions() {
+  let pool = shuffle(activePool()).filter(item => [...item.hanzi].length === 1);
+  if (state.count !== 'all') pool = pool.slice(0, state.count);
+  return pool;
+}
+
 function poolSize() {
   return activePool().length;
 }
@@ -185,6 +177,11 @@ function renderModeSelector() {
           <div class="quiz-mode-name">Pinyin → Hanzi</div>
           <div class="quiz-mode-hint">Veja o pinyin, escolha o caractere</div>
         </button>
+        <button class="quiz-mode-card quiz-mode-card--stroke" data-mode="stroke-order">
+          <div class="quiz-mode-glyph">描</div>
+          <div class="quiz-mode-name">Escrita de Traços</div>
+          <div class="quiz-mode-hint">Observe a animação e escreva o caractere</div>
+        </button>
       </div>
     </div>
   `.trim();
@@ -230,7 +227,7 @@ function renderModeSelector() {
 // ── QUESTION ─────────────────────────────────────────────────────
 function startQuiz(mode) {
   state.mode      = mode;
-  state.questions = buildQuestions(mode);
+  state.questions = mode === 'stroke-order' ? buildStrokeQuestions() : buildQuestions(mode);
   state.current   = 0;
   state.score     = 0;
   state.answered  = false;
@@ -238,6 +235,11 @@ function startQuiz(mode) {
 }
 
 function renderQuestion() {
+  if (state.mode === 'stroke-order') {
+    renderStrokeQuestion();
+    return;
+  }
+
   state.answered = false;
   const q     = state.questions[state.current];
   const total = state.questions.length;
@@ -260,24 +262,18 @@ function renderQuestion() {
       </div>
       <div class="quiz-q-wrap">
         <p class="quiz-q-label">${LABELS[state.mode]}</p>
-        ${state.mode === 'hanzi-to-trans' && [...q.questionText].length === 1
-          ? `<div class="quiz-q-hw-target" data-hw="${q.questionText}"></div>`
-          : `<div class="quiz-q-text ${q.qClass}">${q.questionText}</div>`
-        }
+        <div class="quiz-q-text ${q.qClass}">${q.questionText}</div>
         ${q.qSub ? `<p class="quiz-q-sub">${q.qSub}</p>` : ''}
       </div>
       <div class="quiz-opts">
         ${q.options.map((opt, i) => {
           const src = q.optionItems[i];
-          const backHanzi = [...src.hanzi].length === 1
-            ? `<div class="quiz-opt-hw-target" data-hw="${src.hanzi}"></div>`
-            : `<div class="quiz-opt-back-hanzi">${src.hanzi}</div>`;
           return `
             <div class="quiz-opt-card${q.optClass ? ` ${q.optClass}` : ''}" data-idx="${i}">
               <div class="quiz-opt-inner">
                 <div class="quiz-opt-front">${opt}</div>
                 <div class="quiz-opt-back">
-                  ${backHanzi}
+                  <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
                   <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
                   <div class="quiz-opt-back-trans">${src.fcTranslation ?? src.translation}</div>
                 </div>
@@ -293,8 +289,6 @@ function renderQuestion() {
       </div>
     </div>
   `.trim();
-
-  initQuizHW();
 
   container.querySelectorAll('.quiz-opt-card').forEach(card =>
     card.addEventListener('click', () => handleAnswer(+card.dataset.idx))
@@ -323,6 +317,106 @@ function handleAnswer(idx) {
   document.getElementById('quizNext').disabled = false;
 }
 
+// ── STROKE ORDER MODULE ──────────────────────────────────────────
+function renderStrokeQuestion() {
+  state.answered = false;
+  const item  = state.questions[state.current];
+  const total = state.questions.length;
+  const idx   = state.current + 1;
+
+  container.innerHTML = `
+    <div class="quiz-screen">
+      <div class="quiz-status">
+        <span class="quiz-counter">${idx} / ${total}</span>
+        <span class="quiz-score-label">${state.score} perfeitas</span>
+      </div>
+      <div class="quiz-bar">
+        <div class="quiz-bar-fill" style="width:${(idx / total) * 100}%"></div>
+      </div>
+      <div class="quiz-stroke-wrap">
+        <p class="quiz-q-label">Observe a animação e escreva</p>
+        <div class="quiz-stroke-prompt">
+          <div class="quiz-stroke-trans">${item.fcTranslation ?? item.translation}</div>
+          <div class="quiz-stroke-pinyin">${item.pinyin}</div>
+        </div>
+        <div class="quiz-stroke-canvas" id="quizHWCanvas"></div>
+        <p class="quiz-stroke-hint" id="quizStrokeHint">Observe os traços — em seguida escreva</p>
+        <button class="quiz-stroke-replay" id="quizStrokeReplay" disabled>Rever animação</button>
+      </div>
+      <div class="quiz-foot">
+        <button class="quiz-quit" id="quizQuit">Encerrar</button>
+        <button class="quiz-next" id="quizNext" disabled>
+          ${state.current < total - 1 ? 'Próxima' : 'Ver resultado'}
+        </button>
+      </div>
+    </div>
+  `.trim();
+
+  if (typeof HanziWriter === 'undefined') {
+    document.getElementById('quizStrokeHint').textContent = 'HanziWriter não carregado.';
+    return;
+  }
+
+  const el = document.getElementById('quizHWCanvas');
+  const writer = HanziWriter.create(el, item.hanzi, {
+    width: 220,
+    height: 220,
+    padding: 10,
+    showCharacter: true,
+    showOutline: true,
+    strokeColor: '#2D2926',
+    outlineColor: 'rgba(0,0,0,0.12)',
+    highlightColor: '#4070C0',
+    drawingColor: '#2D2926',
+    strokeAnimationSpeed: 1,
+    delayBetweenStrokes: 250,
+  });
+
+  function playAnimation() {
+    const replayBtn = document.getElementById('quizStrokeReplay');
+    if (replayBtn) replayBtn.disabled = true;
+    writer.animateCharacter({
+      onComplete: () => {
+        if (replayBtn) replayBtn.disabled = false;
+        startDrawing();
+      },
+    });
+  }
+
+  function startDrawing() {
+    const hint = document.getElementById('quizStrokeHint');
+    if (hint) hint.textContent = 'Agora escreva o caractere traço por traço';
+    writer.hideCharacter();
+    writer.quiz({
+      onMistake: () => {},
+      onComplete: summary => {
+        state.answered = true;
+        if (summary.totalMistakes === 0) state.score++;
+        const hint = document.getElementById('quizStrokeHint');
+        if (hint) {
+          const ok = summary.totalMistakes === 0;
+          hint.textContent = ok
+            ? 'Perfeito! Nenhum erro.'
+            : `Concluído com ${summary.totalMistakes} erro${summary.totalMistakes !== 1 ? 's' : ''}.`;
+          hint.className = `quiz-stroke-hint ${ok ? 'quiz-stroke-hint--correct' : 'quiz-stroke-hint--wrong'}`;
+        }
+        const replayBtn = document.getElementById('quizStrokeReplay');
+        if (replayBtn) replayBtn.disabled = true;
+        document.getElementById('quizNext').disabled = false;
+      },
+    });
+  }
+
+  document.getElementById('quizStrokeReplay').addEventListener('click', playAnimation);
+  document.getElementById('quizNext').addEventListener('click', advance);
+  document.getElementById('quizQuit').addEventListener('click', () => {
+    const answered = state.answered ? state.current + 1 : state.current;
+    renderResult(answered);
+  });
+
+  playAnimation();
+}
+
 function advance() {
   if (state.current < state.questions.length - 1) {
     state.current++;
@@ -339,12 +433,13 @@ function renderResult(answeredTotal = state.questions.length) {
   const pct     = total > 0 ? Math.round((state.score / total) * 100) : 0;
   const msg     = total === 0 ? 'Quiz encerrado'
     : pct >= 80 ? 'Excelente!' : pct >= 60 ? 'Bom trabalho!' : 'Continue praticando!';
+  const unit    = state.mode === 'stroke-order' ? 'perfeitas' : 'corretas';
 
   container.innerHTML = `
     <div class="quiz-result">
       <div class="quiz-result-pct">${pct}%</div>
       <h2 class="quiz-result-msg">${msg}</h2>
-      <p class="quiz-result-detail">${state.score} de ${total} corretas${early ? ` <span class="quiz-result-early">(encerrado na ${total + 1}ª pergunta)</span>` : ''}</p>
+      <p class="quiz-result-detail">${state.score} de ${total} ${unit}${early ? ` <span class="quiz-result-early">(encerrado na ${total + 1}ª pergunta)</span>` : ''}</p>
       <button class="btn-reset" id="quizRestart">Reiniciar quiz</button>
     </div>
   `.trim();

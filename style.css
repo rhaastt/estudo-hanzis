@@ -836,18 +836,6 @@
     line-height: 1;
   }
 
-  .quiz-q-hw-target {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto;
-  }
-
-  .quiz-opt-hw-target {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 4px;
-  }
-
   .quiz-q-pinyin {
     font-style: italic;
     font-size: 36px;
@@ -988,6 +976,82 @@
   .quiz-quit:hover {
     border-color: #D04040;
     color: #D04040;
+  }
+
+  /* ── Stroke Order module ── */
+  .quiz-mode-card--stroke .quiz-mode-glyph {
+    font-family: 'DM Serif Display', serif;
+    color: #4070C0;
+  }
+
+  .quiz-stroke-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 0 24px;
+  }
+
+  .quiz-stroke-prompt {
+    text-align: center;
+  }
+
+  .quiz-stroke-trans {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--text);
+  }
+
+  .quiz-stroke-pinyin {
+    font-style: italic;
+    font-size: 16px;
+    color: var(--subtle);
+    margin-top: 2px;
+  }
+
+  .quiz-stroke-canvas {
+    width: 220px;
+    height: 220px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 14px;
+    background: #FAFAF8;
+    cursor: crosshair;
+  }
+
+  .quiz-stroke-hint {
+    font-size: 13px;
+    color: var(--subtle);
+    font-style: italic;
+    min-height: 20px;
+    transition: color 0.2s;
+  }
+
+  .quiz-stroke-hint--correct { color: #1A5C30; font-style: normal; font-weight: 500; }
+  .quiz-stroke-hint--wrong   { color: #801818; font-style: normal; font-weight: 500; }
+
+  .quiz-stroke-replay {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 40px;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    background: transparent;
+    color: var(--subtle);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .quiz-stroke-replay:not(:disabled):hover {
+    border-color: #4070C0;
+    color: #4070C0;
+  }
+
+  .quiz-stroke-replay:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
 
   .quiz-result-early {
