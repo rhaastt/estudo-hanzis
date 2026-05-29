@@ -2,6 +2,21 @@ import { categories, hanziList } from './data.js';
 
 const container = document.getElementById('quizContainer');
 
+function initQuizHW() {
+  if (typeof HanziWriter === 'undefined') return;
+  container.querySelectorAll('[data-hw]:not([data-hw-initialized])').forEach(el => {
+    const size = el.classList.contains('quiz-q-hw-target') ? 120 : 56;
+    HanziWriter.create(el, el.dataset.hw, {
+      width: size, height: size, padding: 5,
+      strokeColor: '#2D2926',
+      outlineColor: 'rgba(0,0,0,0.12)',
+      showCharacter: true,
+      showOutline: true,
+    });
+    el.dataset.hwInitialized = '1';
+  });
+}
+
 const state = {
   mode: null,
   questions: [],
@@ -245,18 +260,24 @@ function renderQuestion() {
       </div>
       <div class="quiz-q-wrap">
         <p class="quiz-q-label">${LABELS[state.mode]}</p>
-        <div class="quiz-q-text ${q.qClass}">${q.questionText}</div>
+        ${state.mode === 'hanzi-to-trans' && [...q.questionText].length === 1
+          ? `<div class="quiz-q-hw-target" data-hw="${q.questionText}"></div>`
+          : `<div class="quiz-q-text ${q.qClass}">${q.questionText}</div>`
+        }
         ${q.qSub ? `<p class="quiz-q-sub">${q.qSub}</p>` : ''}
       </div>
       <div class="quiz-opts">
         ${q.options.map((opt, i) => {
           const src = q.optionItems[i];
+          const backHanzi = [...src.hanzi].length === 1
+            ? `<div class="quiz-opt-hw-target" data-hw="${src.hanzi}"></div>`
+            : `<div class="quiz-opt-back-hanzi">${src.hanzi}</div>`;
           return `
             <div class="quiz-opt-card${q.optClass ? ` ${q.optClass}` : ''}" data-idx="${i}">
               <div class="quiz-opt-inner">
                 <div class="quiz-opt-front">${opt}</div>
                 <div class="quiz-opt-back">
-                  <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
+                  ${backHanzi}
                   <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
                   <div class="quiz-opt-back-trans">${src.fcTranslation ?? src.translation}</div>
                 </div>
@@ -272,6 +293,8 @@ function renderQuestion() {
       </div>
     </div>
   `.trim();
+
+  initQuizHW();
 
   container.querySelectorAll('.quiz-opt-card').forEach(card =>
     card.addEventListener('click', () => handleAnswer(+card.dataset.idx))

@@ -836,6 +836,18 @@
     line-height: 1;
   }
 
+  .quiz-q-hw-target {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+
+  .quiz-opt-hw-target {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+  }
+
   .quiz-q-pinyin {
     font-style: italic;
     font-size: 36px;
