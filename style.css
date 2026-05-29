@@ -332,6 +332,12 @@
     margin-bottom: 8px;
   }
 
+  .fc-hw-target {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 8px;
+  }
+
   .fc-hint {
     font-size: 10px;
     font-weight: 400;

@@ -64,13 +64,17 @@ export function createFlashCard(item) {
   card.dataset.cat = item.category;
 
   const translation = item.fcTranslation ?? item.translation;
-  const ex  = item.examples[0] ?? { zh: '', pt: '' };
+  const ex  = (item.examples ?? [])[0] ?? { zh: '', pt: '' };
   const exText = ex.pt ? `${ex.zh} ${ex.pt}` : ex.zh;
+  const isSingle = [...item.hanzi].length === 1;
+  const frontHanzi = isSingle
+    ? `<div class="fc-hw-target" data-hw="${item.hanzi}"></div>`
+    : `<div class="fc-hanzi">${item.hanzi}</div>`;
 
   card.innerHTML = `
     <div class="fc-inner">
       <div class="fc-front">
-        <div class="fc-hanzi">${item.hanzi}</div>
+        ${frontHanzi}
         <div class="fc-hint">clique para revelar</div>
       </div>
       <div class="fc-back">
