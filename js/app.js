@@ -373,7 +373,6 @@ function closeCmdk() {
   cmdk.hidden = true;
   document.body.classList.remove('cmdk-open');
   cmdkInput.blur();
-  if (document.activeElement === searchInput) searchInput.blur();
 }
 
 function renderCmdkResults(items) {
