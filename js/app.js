@@ -12,10 +12,10 @@ import {
   animateWriter,
   startWriterQuiz,
 } from './services/hanzi-writer.js';
+import { search } from './core/search.js';
 
 const state = {
   activeFilter: 'all',
-  searchTerm: '',
   filteredItems: [],
   renderedCount: 0,
   lastRenderedCat: null,
@@ -50,10 +50,10 @@ const hwModalHint        = document.getElementById('hwModalHint');
 const hwAnimateBtn       = document.getElementById('hwAnimate');
 const hwPracticeBtn      = document.getElementById('hwPractice');
 
-// strip tone diacritics so "ni" matches "nǐ"
-function normalize(str) {
-  return (str ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-}
+// command palette (global search)
+const cmdk        = document.getElementById('cmdk');
+const cmdkInput   = document.getElementById('cmdkInput');
+const cmdkResults = document.getElementById('cmdkResults');
 
 // ── VALIDATION ────────────────────────────────────────────────
 function validate() {
@@ -241,27 +241,18 @@ mobileNav.addEventListener('click', e => {
   if (btn) switchTab(btn.dataset.tab);
 });
 
-// ── FLASH CARD FILTERS (category + search) ───────────────────
+// ── FLASH CARD FILTERS (category) ────────────────────────────
 function computeFiltered() {
-  const term = normalize(state.searchTerm.trim());
-  const matchesSearch = h => {
-    if (!term) return true;
-    return h.hanzi.includes(state.searchTerm.trim()) ||
-      normalize(h.pinyin).includes(term) ||
-      normalize(h.translation).includes(term) ||
-      normalize(h.fcTranslation).includes(term);
-  };
-
   let items;
   if (state.activeFilter === 'all') {
     // grouped: walk categories in their defined order so cards cluster by category
     items = [];
     for (const cat of categories) {
       if (cat.id === 'all' || cat.id === 'pais') continue;
-      items.push(...hanziList.filter(h => h.category === cat.id && matchesSearch(h)));
+      items.push(...hanziList.filter(h => h.category === cat.id));
     }
   } else {
-    items = hanziList.filter(h => h.category === state.activeFilter && matchesSearch(h));
+    items = hanziList.filter(h => h.category === state.activeFilter);
   }
 
   // per-category counts for the section headers
@@ -299,10 +290,9 @@ filterContainer.addEventListener('click', e => {
   rerenderFlash();
 });
 
-searchInput.addEventListener('input', () => {
-  state.searchTerm = searchInput.value;
-  rerenderFlash();
-});
+// the flash-card search box is now a trigger for the global command palette
+searchInput.addEventListener('focus', openCmdk);
+searchInput.addEventListener('click', openCmdk);
 
 // ── FLIP EVENTS ───────────────────────────────────────────────
 fcGrid.addEventListener('click', e => {
@@ -342,6 +332,7 @@ function renderCountries() {
   for (const c of countryList) {
     const card = document.createElement('div');
     card.className = 'country-card';
+    card.dataset.id = `pais-${c.id}`;
     card.innerHTML = `
       <div class="country-inner">
         <div class="country-front">
@@ -361,6 +352,134 @@ function renderCountries() {
 
   paisesContainer.appendChild(grid);
 }
+
+// ── COMMAND PALETTE (global search) ──────────────────────────
+const cmdkState = { results: [], active: 0 };
+
+const TYPE_LABEL = { hanzi: 'Flash Card', pais: 'País' };
+
+function openCmdk() {
+  if (!cmdk.hidden) return;
+  cmdk.hidden = false;
+  document.body.classList.add('cmdk-open');
+  cmdkInput.value = '';
+  renderCmdkResults([]);
+  // defer focus so a click that opened it doesn't immediately blur
+  requestAnimationFrame(() => cmdkInput.focus());
+}
+
+function closeCmdk() {
+  if (cmdk.hidden) return;
+  cmdk.hidden = true;
+  document.body.classList.remove('cmdk-open');
+  cmdkInput.blur();
+  if (document.activeElement === searchInput) searchInput.blur();
+}
+
+function renderCmdkResults(items) {
+  cmdkState.results = items;
+  cmdkState.active = 0;
+
+  if (cmdkInput.value.trim() && items.length === 0) {
+    cmdkResults.innerHTML = '<div class="cmdk-empty">Nenhum resultado encontrado.</div>';
+    return;
+  }
+  if (items.length === 0) {
+    cmdkResults.innerHTML = '<div class="cmdk-empty">Digite para buscar hanzi, pinyin, tradução ou país.</div>';
+    return;
+  }
+
+  cmdkResults.innerHTML = items.map((item, i) => `
+    <button class="cmdk-result${i === 0 ? ' active' : ''}" data-index="${i}" type="button">
+      <span class="cmdk-result-hanzi">${item.hanzi}</span>
+      <span class="cmdk-result-body">
+        <span class="cmdk-result-label">${item.label}</span>
+        <span class="cmdk-result-sub">${item.pinyin} · ${item.sub}</span>
+      </span>
+      <span class="cmdk-result-tag">${TYPE_LABEL[item.type] ?? ''}</span>
+    </button>
+  `).join('');
+}
+
+function setActiveResult(idx) {
+  const btns = cmdkResults.querySelectorAll('.cmdk-result');
+  if (btns.length === 0) return;
+  cmdkState.active = (idx + btns.length) % btns.length;
+  btns.forEach((b, i) => b.classList.toggle('active', i === cmdkState.active));
+  btns[cmdkState.active].scrollIntoView({ block: 'nearest' });
+}
+
+function highlightEl(el) {
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('search-highlight');
+  setTimeout(() => el.classList.remove('search-highlight'), 1600);
+}
+
+// render flash-card batches until the target card exists in the DOM
+function ensureCardRendered(id) {
+  let guard = 0;
+  while (
+    !fcGrid.querySelector(`.fc-item[data-id="${id}"]`) &&
+    state.renderedCount < state.filteredItems.length &&
+    guard++ < 200
+  ) {
+    renderBatch();
+  }
+}
+
+function gotoResult(item) {
+  closeCmdk();
+  switchTab(item.tab);
+
+  if (item.type === 'hanzi') {
+    // a category filter could hide the target — reset to "all" so it's present
+    if (state.activeFilter !== 'all') {
+      state.activeFilter = 'all';
+      document.querySelectorAll('.filter-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.cat === 'all'));
+      rerenderFlash();
+    }
+    ensureCardRendered(item.id);
+    highlightEl(fcGrid.querySelector(`.fc-item[data-id="${item.id}"]`));
+  } else {
+    highlightEl(paisesContainer.querySelector(`.country-card[data-id="${item.id}"]`));
+  }
+}
+
+cmdkInput.addEventListener('input', () => {
+  renderCmdkResults(search(cmdkInput.value));
+});
+
+cmdkInput.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); setActiveResult(cmdkState.active + 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); setActiveResult(cmdkState.active - 1); }
+  else if (e.key === 'Enter') {
+    e.preventDefault();
+    const item = cmdkState.results[cmdkState.active];
+    if (item) gotoResult(item);
+  }
+});
+
+cmdkResults.addEventListener('click', e => {
+  const btn = e.target.closest('.cmdk-result');
+  if (!btn) return;
+  const item = cmdkState.results[Number(btn.dataset.index)];
+  if (item) gotoResult(item);
+});
+
+cmdk.addEventListener('click', e => {
+  if (e.target.closest('[data-cmdk-close]')) closeCmdk();
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    cmdk.hidden ? openCmdk() : closeCmdk();
+  } else if (e.key === 'Escape' && !cmdk.hidden) {
+    closeCmdk();
+  }
+});
 
 // ── INIT ─────────────────────────────────────────────────────
 function init() {
