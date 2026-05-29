@@ -35,11 +35,12 @@ const fcGrid          = document.getElementById('fcGrid');
 const sentinel        = document.getElementById('sentinel');
 const progressFill    = document.getElementById('progressFill');
 const fcCounter       = document.getElementById('fcCounter');
-const resetBtn        = document.getElementById('resetBtn');
-const tabsContainer   = document.getElementById('tabsContainer');
-const mobileNav       = document.getElementById('mobileNav');
-const searchInput     = document.getElementById('fcSearch');
-const paisesContainer = document.getElementById('paisesContainer');
+const resetBtn          = document.getElementById('resetBtn');
+const tabsContainer     = document.getElementById('tabsContainer');
+const mobileNav         = document.getElementById('mobileNav');
+const globalSearchBtn   = document.getElementById('globalSearchBtn');
+const mobileSearchBtn   = document.getElementById('mobileSearchBtn');
+const paisesContainer   = document.getElementById('paisesContainer');
 
 // stroke-order modal
 const hwModal            = document.getElementById('hwModal');
@@ -290,9 +291,8 @@ filterContainer.addEventListener('click', e => {
   rerenderFlash();
 });
 
-// the flash-card search box is now a trigger for the global command palette
-searchInput.addEventListener('focus', openCmdk);
-searchInput.addEventListener('click', openCmdk);
+globalSearchBtn.addEventListener('click', openCmdk);
+mobileSearchBtn.addEventListener('click', openCmdk);
 
 // ── FLIP EVENTS ───────────────────────────────────────────────
 fcGrid.addEventListener('click', e => {
