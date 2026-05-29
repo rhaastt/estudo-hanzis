@@ -89,6 +89,17 @@ export function createFlashCard(item) {
   return card;
 }
 
+export function createCategoryHeader(category, count) {
+  const header = document.createElement('div');
+  header.className = 'fc-cat-header';
+  header.dataset.cat = category.id;
+  header.innerHTML = `
+    <span class="fc-cat-title">${category.guideTitle ?? category.label}</span>
+    <span class="fc-cat-count">${count} ${count === 1 ? 'card' : 'cards'}</span>
+  `.trim();
+  return header;
+}
+
 export function createFilterButton(category, isActive) {
   const btn = document.createElement('button');
   btn.className = 'filter-btn' + (isActive ? ' active' : '');
