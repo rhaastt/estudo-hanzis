@@ -1227,7 +1227,7 @@ export const hanziList = [
   },
 
   ...countryList.map(c => ({
-    id: c.id,
+    id: `pais-${c.id}`,
     hanzi: c.hanzi,
     pinyin: c.pinyin,
     tone: 0,
