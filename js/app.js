@@ -9,6 +9,7 @@ import {
 
 const state = {
   activeFilter: 'all',
+  searchTerm: '',
   filteredItems: [],
   renderedCount: 0,
   flippedIds: new Set(),
@@ -25,7 +26,14 @@ const progressFill    = document.getElementById('progressFill');
 const fcCounter       = document.getElementById('fcCounter');
 const resetBtn        = document.getElementById('resetBtn');
 const tabsContainer   = document.getElementById('tabsContainer');
+const mobileNav       = document.getElementById('mobileNav');
+const searchInput     = document.getElementById('fcSearch');
 const paisesContainer = document.getElementById('paisesContainer');
+
+// strip tone diacritics so "ni" matches "nǐ"
+function normalize(str) {
+  return (str ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
 
 // ── VALIDATION ────────────────────────────────────────────────
 function validate() {
@@ -135,18 +143,53 @@ function updateProgress() {
 }
 
 // ── TABS ─────────────────────────────────────────────────────
+function switchTab(tabId) {
+  // flippedIds and renderedCount intentionally preserved across tab switches
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === tabId));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+}
+
 tabsContainer.addEventListener('click', e => {
   const btn = e.target.closest('.tab-btn');
-  if (!btn) return;
-  const tabId = btn.dataset.tab;
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  btn.classList.add('active');
-  // flippedIds and renderedCount intentionally preserved across tab switches
+  if (btn) switchTab(btn.dataset.tab);
 });
 
-// ── FILTER EVENTS ─────────────────────────────────────────────
+mobileNav.addEventListener('click', e => {
+  const btn = e.target.closest('.mobile-nav-btn');
+  if (btn) switchTab(btn.dataset.tab);
+});
+
+// ── FLASH CARD FILTERS (category + search) ───────────────────
+function computeFiltered() {
+  let items = state.activeFilter === 'all'
+    ? hanziList.filter(h => h.category !== 'pais')
+    : hanziList.filter(h => h.category === state.activeFilter);
+
+  const term = normalize(state.searchTerm.trim());
+  if (term) {
+    items = items.filter(h =>
+      h.hanzi.includes(state.searchTerm.trim()) ||
+      normalize(h.pinyin).includes(term) ||
+      normalize(h.translation).includes(term) ||
+      normalize(h.fcTranslation).includes(term)
+    );
+  }
+  return items;
+}
+
+function rerenderFlash() {
+  state.filteredItems = computeFiltered();
+  state.renderedCount = 0;
+  fcGrid.innerHTML = '';
+  renderBatch();
+  if (state.filteredItems.length === 0) {
+    fcGrid.innerHTML = '<p class="fc-empty">Nenhum resultado encontrado.</p>';
+  }
+  updateProgress();
+  activateObserver();
+}
+
 filterContainer.addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn || btn.dataset.cat === state.activeFilter) return;
@@ -156,17 +199,14 @@ filterContainer.addEventListener('click', e => {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
-  // filter change resets flip state
+  // category change resets flip state
   state.flippedIds.clear();
-  state.filteredItems = state.activeFilter === 'all'
-    ? hanziList.filter(h => h.category !== 'pais')
-    : hanziList.filter(h => h.category === state.activeFilter);
-  state.renderedCount = 0;
+  rerenderFlash();
+});
 
-  fcGrid.innerHTML = '';
-  renderBatch();
-  updateProgress();
-  activateObserver();
+searchInput.addEventListener('input', () => {
+  state.searchTerm = searchInput.value;
+  rerenderFlash();
 });
 
 // ── FLIP EVENTS ───────────────────────────────────────────────
@@ -223,11 +263,12 @@ function init() {
   validate();
   renderFilters();
   renderGuide();
-  state.filteredItems = hanziList.filter(h => h.category !== 'pais');
+  state.filteredItems = computeFiltered();
   renderBatch();
   updateProgress();
   activateObserver();
   renderCountries();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 init();
