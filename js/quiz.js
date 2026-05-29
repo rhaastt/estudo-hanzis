@@ -1,105 +1,27 @@
 import { categories, hanziList } from './data.js';
+import { state, COUNT_OPTIONS, COUNT_LABELS } from './core/quiz-state.js';
+import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engine.js';
+import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
+import { createStrokeWriter, animateWriter, startWriterQuiz } from './services/hanzi-writer.js';
 
 const container = document.getElementById('quizContainer');
 
-const state = {
-  mode: null,
-  questions: [],
-  current: 0,
-  score: 0,
-  answered: false,
-  categories: [],  // empty = Todos
-  count: 10,
-};
-
+// ── SETTINGS PERSISTENCE ─────────────────────────────────────────
 function saveSettings() {
-  localStorage.setItem('quiz-settings', JSON.stringify({ categories: state.categories, count: state.count }));
+  saveQuizSettings({ categories: state.categories, count: state.count });
 }
 
 function loadSettings() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('quiz-settings'));
-    if (!saved) return;
-    const validIds = new Set(categories.map(c => c.id));
-    if (Array.isArray(saved.categories)) {
-      state.categories = saved.categories.filter(id => validIds.has(id) && id !== 'all');
-    }
-    if (saved.count === 'all' || COUNT_OPTIONS.includes(saved.count)) {
-      state.count = saved.count;
-    }
-  } catch {}
+  const saved = loadQuizSettings();
+  if (!saved) return;
+  const validIds = new Set(categories.map(c => c.id));
+  if (Array.isArray(saved.categories))
+    state.categories = saved.categories.filter(id => validIds.has(id) && id !== 'all');
+  if (saved.count === 'all' || COUNT_OPTIONS.includes(saved.count))
+    state.count = saved.count;
 }
 
-const COUNT_OPTIONS = [5, 10, 20, 'all'];
-const COUNT_LABELS  = { 5: '5', 10: '10', 20: '20', all: 'Todos' };
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function activePool() {
-  return state.categories.length === 0
-    ? [...hanziList]
-    : hanziList.filter(h => state.categories.includes(h.category));
-}
-
-function buildQuestions(mode) {
-  let pool = shuffle(activePool());
-  if (state.count !== 'all') pool = pool.slice(0, state.count);
-
-  return pool.map(item => {
-    let questionText, qClass, qSub, getVal, optClass;
-
-    if (mode === 'hanzi-to-trans') {
-      questionText = item.hanzi;
-      qClass      = 'quiz-q-hanzi';
-      qSub        = '';
-      getVal      = h => h.fcTranslation ?? h.translation;
-      optClass    = '';
-    } else if (mode === 'trans-to-hanzi') {
-      questionText = item.fcTranslation ?? item.translation;
-      qClass      = '';
-      qSub        = '';
-      getVal      = h => h.hanzi;
-      optClass    = 'quiz-opt-hanzi';
-    } else {
-      // pinyin-to-hanzi: show translation as context to avoid tā ambiguity (他/她)
-      questionText = item.pinyin;
-      qClass      = 'quiz-q-pinyin';
-      qSub        = item.fcTranslation ?? item.translation;
-      getVal      = h => h.hanzi;
-      optClass    = 'quiz-opt-hanzi';
-    }
-
-    const correctAnswer = getVal(item);
-    const wrongItems    = shuffle(hanziList.filter(h => h.id !== item.id && getVal(h) !== correctAnswer)).slice(0, 3);
-    const allPairs      = shuffle([
-      { value: correctAnswer, src: item },
-      ...wrongItems.map(wi => ({ value: getVal(wi), src: wi })),
-    ]);
-    const options     = allPairs.map(p => p.value);
-    const optionItems = allPairs.map(p => p.src);
-
-    return { questionText, qClass, qSub, options, optionItems, optClass, correctIndex: options.indexOf(correctAnswer) };
-  });
-}
-
-// Stroke mode uses only single-char items — raw items, no options/correctIndex needed
-function buildStrokeQuestions() {
-  let pool = shuffle(activePool()).filter(item => [...item.hanzi].length === 1);
-  if (state.count !== 'all') pool = pool.slice(0, state.count);
-  return pool;
-}
-
-function poolSize() {
-  return activePool().length;
-}
-
+// ── SELECTOR HELPERS ──────────────────────────────────────────────
 function updateCountButtons(available) {
   if (state.count !== 'all' && state.count > available) {
     state.count = 'all';
@@ -122,7 +44,6 @@ function updateCountButtons(available) {
   });
 }
 
-// ── MODE SELECTOR ────────────────────────────────────────────────
 function updateCatPills() {
   container.querySelectorAll('.quiz-cat-pill').forEach(btn => {
     const cat = btn.dataset.cat;
@@ -132,6 +53,7 @@ function updateCatPills() {
   });
 }
 
+// ── MODE SELECTOR ─────────────────────────────────────────────────
 function renderModeSelector() {
   const catItemCount = Object.fromEntries(
     categories.map(c => [c.id, c.id === 'all' ? hanziList.length : hanziList.filter(h => h.category === c.id).length])
@@ -188,21 +110,18 @@ function renderModeSelector() {
 
   container.querySelectorAll('.quiz-cat-pill').forEach(btn =>
     btn.addEventListener('click', () => {
-      const cat = btn.dataset.cat;
+      const cat    = btn.dataset.cat;
       const allIds = specificCats.map(c => c.id);
       if (cat === 'all') {
         state.categories = [];
       } else if (state.categories.includes(cat)) {
-        const next = state.categories.filter(c => c !== cat);
-        // deselecting last specific → treat as Todos
-        state.categories = next;
+        state.categories = state.categories.filter(c => c !== cat);
       } else {
         const next = [...state.categories, cat];
-        // all specific selected → snap to Todos
         state.categories = allIds.every(id => next.includes(id)) ? [] : next;
       }
       updateCatPills();
-      updateCountButtons(poolSize());
+      updateCountButtons(poolSize(state.categories));
       saveSettings();
     })
   );
@@ -221,19 +140,22 @@ function renderModeSelector() {
     btn.addEventListener('click', () => startQuiz(btn.dataset.mode))
   );
 
-  updateCountButtons(poolSize());
+  updateCountButtons(poolSize(state.categories));
 }
 
-// ── QUESTION ─────────────────────────────────────────────────────
+// ── QUIZ START ────────────────────────────────────────────────────
 function startQuiz(mode) {
   state.mode      = mode;
-  state.questions = mode === 'stroke-order' ? buildStrokeQuestions() : buildQuestions(mode);
+  state.questions = mode === 'stroke-order'
+    ? buildStrokeQuestions(state.categories, state.count)
+    : buildQuestions(mode, state.categories, state.count);
   state.current   = 0;
   state.score     = 0;
   state.answered  = false;
   renderQuestion();
 }
 
+// ── QUESTION ──────────────────────────────────────────────────────
 function renderQuestion() {
   if (state.mode === 'stroke-order') {
     renderStrokeQuestion();
@@ -317,7 +239,7 @@ function handleAnswer(idx) {
   document.getElementById('quizNext').disabled = false;
 }
 
-// ── STROKE ORDER MODULE ──────────────────────────────────────────
+// ── STROKE ORDER MODULE ───────────────────────────────────────────
 function renderStrokeQuestion() {
   state.answered = false;
   const item  = state.questions[state.current];
@@ -352,30 +274,25 @@ function renderStrokeQuestion() {
     </div>
   `.trim();
 
-  if (typeof HanziWriter === 'undefined') {
-    document.getElementById('quizStrokeHint').textContent = 'HanziWriter não carregado.';
+  const el     = document.getElementById('quizHWCanvas');
+  const writer = createStrokeWriter(el, item.hanzi, {
+    width: 220, height: 220, padding: 10,
+    showCharacter: true, showOutline: true,
+    strokeColor: '#2D2926', outlineColor: 'rgba(0,0,0,0.12)',
+    highlightColor: '#4070C0', drawingColor: '#2D2926',
+    strokeAnimationSpeed: 1, delayBetweenStrokes: 250,
+  });
+
+  if (!writer) {
+    const hint = document.getElementById('quizStrokeHint');
+    if (hint) hint.textContent = 'HanziWriter não carregado.';
     return;
   }
-
-  const el = document.getElementById('quizHWCanvas');
-  const writer = HanziWriter.create(el, item.hanzi, {
-    width: 220,
-    height: 220,
-    padding: 10,
-    showCharacter: true,
-    showOutline: true,
-    strokeColor: '#2D2926',
-    outlineColor: 'rgba(0,0,0,0.12)',
-    highlightColor: '#4070C0',
-    drawingColor: '#2D2926',
-    strokeAnimationSpeed: 1,
-    delayBetweenStrokes: 250,
-  });
 
   function playAnimation() {
     const replayBtn = document.getElementById('quizStrokeReplay');
     if (replayBtn) replayBtn.disabled = true;
-    writer.animateCharacter({
+    animateWriter(writer, {
       onComplete: () => {
         if (replayBtn) replayBtn.disabled = false;
         startDrawing();
@@ -386,8 +303,7 @@ function renderStrokeQuestion() {
   function startDrawing() {
     const hint = document.getElementById('quizStrokeHint');
     if (hint) hint.textContent = 'Agora escreva o caractere traço por traço';
-    writer.hideCharacter();
-    writer.quiz({
+    startWriterQuiz(writer, {
       onMistake: () => {},
       onComplete: summary => {
         state.answered = true;
@@ -417,6 +333,7 @@ function renderStrokeQuestion() {
   playAnimation();
 }
 
+// ── ADVANCE ───────────────────────────────────────────────────────
 function advance() {
   if (state.current < state.questions.length - 1) {
     state.current++;
@@ -426,14 +343,14 @@ function advance() {
   }
 }
 
-// ── RESULT ───────────────────────────────────────────────────────
+// ── RESULT ────────────────────────────────────────────────────────
 function renderResult(answeredTotal = state.questions.length) {
-  const total   = answeredTotal;
-  const early   = total < state.questions.length;
-  const pct     = total > 0 ? Math.round((state.score / total) * 100) : 0;
-  const msg     = total === 0 ? 'Quiz encerrado'
+  const total = answeredTotal;
+  const early = total < state.questions.length;
+  const pct   = total > 0 ? Math.round((state.score / total) * 100) : 0;
+  const msg   = total === 0 ? 'Quiz encerrado'
     : pct >= 80 ? 'Excelente!' : pct >= 60 ? 'Bom trabalho!' : 'Continue praticando!';
-  const unit    = state.mode === 'stroke-order' ? 'perfeitas' : 'corretas';
+  const unit  = state.mode === 'stroke-order' ? 'perfeitas' : 'corretas';
 
   container.innerHTML = `
     <div class="quiz-result">
@@ -450,5 +367,6 @@ function renderResult(answeredTotal = state.questions.length) {
   });
 }
 
+// ── INIT ──────────────────────────────────────────────────────────
 loadSettings();
 renderModeSelector();
