@@ -1653,6 +1653,7 @@ body.cmdk-open { overflow: hidden; }
 /* shared highlight pulse when search navigates to a card */
 .search-highlight {
   animation: searchPulse 1.6s ease;
+  opacity: 1 !important; /* override fadeUp on freshly lazy-rendered cards */
 }
 
 @keyframes searchPulse {
