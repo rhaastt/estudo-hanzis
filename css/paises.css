@@ -1,0 +1,91 @@
+  /* ===================== PAÍSES ===================== */
+  .paises-wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .country-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+
+  .country-card {
+    height: 180px;
+    perspective: 800px;
+    cursor: pointer;
+  }
+
+  .country-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--card-radius);
+  }
+
+  .country-card.flipped .country-inner { transform: rotateY(180deg); }
+
+  .country-front,
+  .country-back {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--card-radius);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: white;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .country-front:hover { border-color: var(--accent); }
+
+  .country-back { transform: rotateY(180deg); background: #F7F4F0; }
+
+  .country-flag {
+    width: 80px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    flex-shrink: 0;
+  }
+
+  .country-name {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--subtle);
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  .country-hanzi {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .country-pinyin {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--subtle);
+    letter-spacing: 0.5px;
+  }
+
+  .country-name-back {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
