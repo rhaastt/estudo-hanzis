@@ -1,5 +1,6 @@
 import { hanziList } from '../data.js';
 import { countryList } from '../countries.js';
+import { HSK_LEVELS } from './hsk-levels.js';
 
 export function normalize(str) {
   return (str ?? '')
@@ -28,6 +29,7 @@ function buildIndex() {
     ].filter(Boolean).join(' '));
     const extended = normalize([h.mnemonic, exText, h.categoryLabel].filter(Boolean).join(' '));
 
+    const hsk = HSK_LEVELS[h.id] ?? null;
     entries.push({
       id:          h.id,
       type:        'hanzi',
@@ -36,10 +38,11 @@ function buildIndex() {
       pinyin:      h.pinyin,
       label:       h.fcTranslation ?? h.translation,
       sub:         h.categoryLabel,
+      hsk,
       pinyinNorm:  normalize(h.pinyin),
       labelNorm:   normalize(h.translation),
       core,
-      haystack:    core + ' ' + extended,
+      haystack:    core + ' ' + extended + (hsk ? ` hsk${hsk} hsk ${hsk}` : ' sem hsk'),
     });
   }
 

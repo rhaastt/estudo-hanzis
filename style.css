@@ -1666,3 +1666,48 @@ body.cmdk-open { overflow: hidden; }
   .cmdk { padding: 8vh 12px 12px; }
   .cmdk-footer { display: none; }
 }
+
+/* ── HSK FILTER ROW ──────────────────────────────────────────── */
+.fc-hsk-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.fc-hsk-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  margin-right: 2px;
+}
+
+.hsk-filter-btn { font-size: 12px; padding: 8px 16px; }
+
+/* ── HSK BADGE ON CARD BACK ──────────────────────────────────── */
+.fc-back-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.fc-hsk-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.hsk-1 { background: #D6EFD8; color: #1E6B2E; }
+.hsk-2 { background: #D1E8FF; color: #0D4A80; }
+.hsk-3 { background: #FFF0D1; color: #7A4A00; }
+.hsk-4 { background: #EDE0FF; color: #4A1E7A; }
+.hsk-5 { background: #FFE0E0; color: #7A1E1E; }
+.hsk-6 { background: #2A2A2A; color: #F5F5F5; }

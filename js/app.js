@@ -13,9 +13,11 @@ import {
   startWriterQuiz,
 } from './services/hanzi-writer.js';
 import { search } from './core/search.js';
+import { HSK_LEVELS, HSK_FILTER_OPTIONS } from './core/hsk-levels.js';
 
 const state = {
   activeFilter: 'all',
+  hskFilter: 'all',
   filteredItems: [],
   renderedCount: 0,
   lastRenderedCat: null,
@@ -30,7 +32,8 @@ const categoryById = new Map(categories.map(c => [c.id, c]));
 const BATCH_SIZE = 24;
 
 const guideContainer  = document.getElementById('guideContainer');
-const filterContainer = document.getElementById('filterContainer');
+const filterContainer    = document.getElementById('filterContainer');
+const hskFilterContainer = document.getElementById('hskFilterContainer');
 const fcGrid          = document.getElementById('fcGrid');
 const sentinel        = document.getElementById('sentinel');
 const progressFill    = document.getElementById('progressFill');
@@ -171,6 +174,32 @@ function renderFilters() {
   }
 }
 
+function renderHskFilters() {
+  hskFilterContainer.innerHTML = '';
+  const label = document.createElement('span');
+  label.className = 'fc-hsk-label';
+  label.textContent = 'HSK:';
+  hskFilterContainer.appendChild(label);
+
+  for (const opt of HSK_FILTER_OPTIONS) {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn hsk-filter-btn' + (opt.id === state.hskFilter ? ' active' : '');
+    btn.dataset.hsk = opt.id;
+    btn.textContent = opt.label;
+    hskFilterContainer.appendChild(btn);
+  }
+}
+
+hskFilterContainer.addEventListener('click', e => {
+  const btn = e.target.closest('.hsk-filter-btn');
+  if (!btn || btn.dataset.hsk === state.hskFilter) return;
+  state.hskFilter = btn.dataset.hsk;
+  hskFilterContainer.querySelectorAll('.hsk-filter-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.hsk === state.hskFilter));
+  state.flippedIds.clear();
+  rerenderFlash();
+});
+
 // ── LAZY LOAD ─────────────────────────────────────────────────
 function renderBatch() {
   const grouped = state.activeFilter === 'all';
@@ -242,18 +271,25 @@ mobileNav.addEventListener('click', e => {
   if (btn) switchTab(btn.dataset.tab);
 });
 
-// ── FLASH CARD FILTERS (category) ────────────────────────────
+// ── FLASH CARD FILTERS (category + HSK) ──────────────────────
+function matchesHsk(item) {
+  const lvl = HSK_LEVELS[item.id] ?? null;
+  if (state.hskFilter === 'all')  return true;
+  if (state.hskFilter === 'none') return lvl === null;
+  if (state.hskFilter === '4')    return lvl !== null && lvl >= 4;
+  return lvl === Number(state.hskFilter);
+}
+
 function computeFiltered() {
   let items;
   if (state.activeFilter === 'all') {
-    // grouped: walk categories in their defined order so cards cluster by category
     items = [];
     for (const cat of categories) {
       if (cat.id === 'all' || cat.id === 'pais') continue;
-      items.push(...hanziList.filter(h => h.category === cat.id));
+      items.push(...hanziList.filter(h => h.category === cat.id && matchesHsk(h)));
     }
   } else {
-    items = hanziList.filter(h => h.category === state.activeFilter);
+    items = hanziList.filter(h => h.category === state.activeFilter && matchesHsk(h));
   }
 
   // per-category counts for the section headers
@@ -484,6 +520,7 @@ document.addEventListener('keydown', e => {
 function init() {
   validate();
   renderFilters();
+  renderHskFilters();
   renderGuide();
   state.filteredItems = computeFiltered();
   renderBatch();

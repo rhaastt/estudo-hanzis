@@ -1,3 +1,5 @@
+import { HSK_LEVELS } from './core/hsk-levels.js';
+
 // tone → CSS class for pinyin (tone-5 = neutral)
 const PINYIN_CLASS = ['tone-5', 'tone-1', 'tone-2', 'tone-3', 'tone-4'];
 // tone → CSS class for tone-block badge
@@ -75,6 +77,11 @@ export function createFlashCard(item) {
     ? `<button class="fc-hw-btn" type="button"><i data-lucide="pen-tool"></i> Ver traços</button>`
     : '';
 
+  const hskLevel = HSK_LEVELS[item.id] ?? null;
+  const hskBadge = hskLevel !== null
+    ? `<span class="fc-hsk-badge hsk-${hskLevel}">HSK ${hskLevel}</span>`
+    : '';
+
   card.innerHTML = `
     <div class="fc-inner">
       <div class="fc-front">
@@ -84,7 +91,10 @@ export function createFlashCard(item) {
       <div class="fc-back">
         <div class="fc-pinyin">${item.pinyin}</div>
         <div class="fc-translation">${translation}</div>
-        <div class="fc-category-tag">${item.categoryLabel}</div>
+        <div class="fc-back-meta">
+          <div class="fc-category-tag">${item.categoryLabel}</div>
+          ${hskBadge}
+        </div>
         <div class="fc-example">${exText}</div>
         ${strokeBtn}
       </div>
