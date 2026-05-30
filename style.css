@@ -495,7 +495,28 @@
     margin-top: 8px;
   }
 
-  /* -------- Cores das categorias -------- */
+  /* -------- Cores por nível HSK -------- */
+  .hsk-card-1 .fc-front { background: #E8F7E9; }
+  .hsk-card-1 .fc-back  { background: #D4EFD6; }
+  .hsk-card-1 .fc-hanzi, .hsk-card-1 .fc-pinyin { color: #1E6B2E; }
+
+  .hsk-card-2 .fc-front { background: #E0EEFF; }
+  .hsk-card-2 .fc-back  { background: #CBE4FF; }
+  .hsk-card-2 .fc-hanzi, .hsk-card-2 .fc-pinyin { color: #0D4A80; }
+
+  .hsk-card-3 .fc-front { background: #FFF5D8; }
+  .hsk-card-3 .fc-back  { background: #FFEFC0; }
+  .hsk-card-3 .fc-hanzi, .hsk-card-3 .fc-pinyin { color: #7A4A00; }
+
+  .hsk-card-4 .fc-front { background: #F0E8FF; }
+  .hsk-card-4 .fc-back  { background: #E4D4FF; }
+  .hsk-card-4 .fc-hanzi, .hsk-card-4 .fc-pinyin { color: #4A1E7A; }
+
+  .hsk-card-none .fc-front { background: #EEECEA; }
+  .hsk-card-none .fc-back  { background: #E2E0DC; }
+  .hsk-card-none .fc-hanzi, .hsk-card-none .fc-pinyin { color: #505050; }
+
+  /* -------- Cores das categorias (mantidas para HanziWriter) -------- */
   .cat-pronome   .fc-front { background: #E3EDFF; }
   .cat-pronome   .fc-back  { background: #D0E3FF; }
   .cat-pronome   .fc-hanzi, .cat-pronome .fc-pinyin { color: #4070C0; }
@@ -1687,7 +1708,7 @@ body.cmdk-open { overflow: hidden; }
 
 .hsk-filter-btn { font-size: 12px; padding: 8px 16px; }
 
-/* ── HSK BADGE ON CARD BACK ──────────────────────────────────── */
+/* ── BADGE DE CATEGORIA NO VERSO DO CARD ─────────────────────── */
 .fc-back-meta {
   display: flex;
   align-items: center;
@@ -1696,7 +1717,7 @@ body.cmdk-open { overflow: hidden; }
   justify-content: center;
 }
 
-.fc-hsk-badge {
+.fc-cat-badge {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1705,6 +1726,20 @@ body.cmdk-open { overflow: hidden; }
   white-space: nowrap;
 }
 
+.fc-cat-badge--pronome     { background: #E3EDFF; color: #4070C0; }
+.fc-cat-badge--verbo       { background: #FFE8E8; color: #B04040; }
+.fc-cat-badge--adverbio    { background: #E3FFE9; color: #307A40; }
+.fc-cat-badge--particula   { background: #FFF3E0; color: #A06020; }
+.fc-cat-badge--substantivo { background: #EDE3FF; color: #7040B0; }
+.fc-cat-badge--adjetivo    { background: #FFF5D8; color: #8A6000; }
+.fc-cat-badge--numero      { background: #EDF0F5; color: #3A5080; }
+.fc-cat-badge--lingua      { background: #FFE0F5; color: #A04090; }
+.fc-cat-badge--interrogativo { background: #E0FFF8; color: #207860; }
+.fc-cat-badge--nome-proprio  { background: #FFEAEC; color: #8A2A30; }
+.fc-cat-badge--conectivo     { background: #F5F5D8; color: #707020; }
+.fc-cat-badge--pais          { background: #E8F0E8; color: #305030; }
+
+/* mantidas para compatibilidade com quiz e outros contextos */
 .hsk-1 { background: #D6EFD8; color: #1E6B2E; }
 .hsk-2 { background: #D1E8FF; color: #0D4A80; }
 .hsk-3 { background: #FFF0D1; color: #7A4A00; }

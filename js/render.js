@@ -60,8 +60,10 @@ export function createGuideGroup(category, items) {
 }
 
 export function createFlashCard(item) {
+  const hskLevel = HSK_LEVELS[item.id] ?? null;
+
   const card = document.createElement('div');
-  card.className = `fc-item cat-${item.category}`;
+  card.className = `fc-item hsk-card-${hskLevel ?? 'none'}`;
   card.dataset.id  = item.id;
   card.dataset.cat = item.category;
 
@@ -77,10 +79,8 @@ export function createFlashCard(item) {
     ? `<button class="fc-hw-btn" type="button"><i data-lucide="pen-tool"></i> Ver traços</button>`
     : '';
 
-  const hskLevel = HSK_LEVELS[item.id] ?? null;
-  const hskBadge = hskLevel !== null
-    ? `<span class="fc-hsk-badge hsk-${hskLevel}">HSK ${hskLevel}</span>`
-    : '';
+  const shortCat = item.categoryLabel.split(' · ')[0];
+  const catBadge = `<span class="fc-cat-badge fc-cat-badge--${item.category}">${shortCat}</span>`;
 
   card.innerHTML = `
     <div class="fc-inner">
@@ -92,8 +92,7 @@ export function createFlashCard(item) {
         <div class="fc-pinyin">${item.pinyin}</div>
         <div class="fc-translation">${translation}</div>
         <div class="fc-back-meta">
-          <div class="fc-category-tag">${item.categoryLabel}</div>
-          ${hskBadge}
+          ${catBadge}
         </div>
         <div class="fc-example">${exText}</div>
         ${strokeBtn}

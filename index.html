@@ -16,8 +16,8 @@
 </header>
 
 <div class="tabs" id="tabsContainer">
-  <button class="tab-btn active" data-tab="guia">Guia de Estudo</button>
-  <button class="tab-btn" data-tab="flashcards">Flash Cards</button>
+  <button class="tab-btn active" data-tab="flashcards">Flash Cards</button>
+  <button class="tab-btn" data-tab="guia">Guia de Estudo</button>
   <button class="tab-btn" data-tab="quiz">Quiz</button>
   <button class="tab-btn" data-tab="paises">Países</button>
   <button class="tab-search-btn" id="globalSearchBtn" aria-label="Buscar">
@@ -26,11 +26,7 @@
   </button>
 </div>
 
-<div id="guia" class="section active">
-  <div class="guide-wrap" id="guideContainer"></div>
-</div>
-
-<div id="flashcards" class="section">
+<div id="flashcards" class="section active">
   <div class="flashcards-wrap">
     <div class="fc-progress-bar">
       <div class="fc-progress-fill" id="progressFill"></div>
@@ -39,13 +35,16 @@
       <span class="fc-counter" id="fcCounter">0 / 0 virados</span>
       <div class="fc-filter" id="filterContainer"></div>
     </div>
-    <div class="fc-hsk-row" id="hskFilterContainer"></div>
     <div class="fc-grid" id="fcGrid"></div>
     <div id="sentinel"></div>
     <div class="fc-reset-wrap">
       <button class="btn-reset" id="resetBtn">Reiniciar todos os cards</button>
     </div>
   </div>
+</div>
+
+<div id="guia" class="section">
+  <div class="guide-wrap" id="guideContainer"></div>
 </div>
 
 <div id="quiz" class="section">
@@ -94,13 +93,13 @@
 </div>
 
 <nav class="mobile-nav" id="mobileNav">
-  <button class="mobile-nav-btn active" data-tab="guia">
-    <i data-lucide="book-open"></i>
-    <span>Guia</span>
-  </button>
-  <button class="mobile-nav-btn" data-tab="flashcards">
+  <button class="mobile-nav-btn active" data-tab="flashcards">
     <i data-lucide="layers"></i>
     <span>Cards</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab="guia">
+    <i data-lucide="book-open"></i>
+    <span>Guia</span>
   </button>
   <button class="mobile-nav-btn" data-tab="quiz">
     <i data-lucide="brain"></i>
