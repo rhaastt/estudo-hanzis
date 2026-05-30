@@ -1,0 +1,201 @@
+  /* ===================== GUIA DE ESTUDO ===================== */
+  .guide-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .group {
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .group-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .group-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  .group-count {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--subtle);
+  }
+
+  .group-tip {
+    background: white;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--subtle);
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+
+  .hanzi-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .hanzi-table th {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--subtle);
+    text-align: left;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .hanzi-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  .hanzi-table tr:last-child td { border-bottom: none; }
+
+  .hanzi-table tr:hover td { background: rgba(255,255,255,0.5); }
+
+  .hanzi-char {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    line-height: 1;
+    min-width: 50px;
+    display: inline-block;
+  }
+
+  .pinyin {
+    font-size: 13px;
+    color: var(--subtle);
+    font-style: italic;
+  }
+
+  .tone-1 { color: #E05050; }
+  .tone-2 { color: #E07020; }
+  .tone-3 { color: #2080D0; }
+  .tone-4 { color: #5050C0; }
+  .tone-5 { color: var(--subtle); }
+
+  .translation { font-weight: 400; }
+
+  .mnemonic {
+    font-size: 12px;
+    color: var(--subtle);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ===================== TONS ===================== */
+  .tone-block {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+  }
+
+  .t1 { background: #FFE0E0; color: #C04040; }
+  .t2 { background: #FFE8D0; color: #B05820; }
+  .t3 { background: #D8E8FF; color: #2060B0; }
+  .t4 { background: #E8D8FF; color: #6030A0; }
+  .tn { background: #E0E0E0; color: #606060; }
+
+  /* ===================== ANIMATIONS ===================== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .group:nth-child(1)  { animation-delay: 0.05s }
+  .group:nth-child(2)  { animation-delay: 0.10s }
+  .group:nth-child(3)  { animation-delay: 0.15s }
+  .group:nth-child(4)  { animation-delay: 0.20s }
+  .group:nth-child(5)  { animation-delay: 0.25s }
+  .group:nth-child(6)  { animation-delay: 0.30s }
+  .group:nth-child(7)  { animation-delay: 0.35s }
+  .group:nth-child(8)  { animation-delay: 0.40s }
+  .group:nth-child(9)  { animation-delay: 0.45s }
+  .group:nth-child(10) { animation-delay: 0.50s }
+  .group:nth-child(11) { animation-delay: 0.55s }
+  .group:nth-child(12) { animation-delay: 0.60s }
+  .group:nth-child(13) { animation-delay: 0.65s }
+
+  /* ===================== GROUP COLORS — via data-cat (ordem não importa) ===================== */
+  .group[data-cat="pronome"]      .group-dot { background: var(--blue); }
+  .group[data-cat="pronome"]      .group-tip { border-left-color: var(--blue); }
+  .group[data-cat="verbo"]        .group-dot { background: var(--red); }
+  .group[data-cat="verbo"]        .group-tip { border-left-color: var(--red); }
+  .group[data-cat="adverbio"]     .group-dot { background: var(--green); }
+  .group[data-cat="adverbio"]     .group-tip { border-left-color: var(--green); }
+  .group[data-cat="particula"]    .group-dot { background: var(--orange); }
+  .group[data-cat="particula"]    .group-tip { border-left-color: var(--orange); }
+  .group[data-cat="substantivo"]  .group-dot { background: var(--purple); }
+  .group[data-cat="substantivo"]  .group-tip { border-left-color: var(--purple); }
+  .group[data-cat="adjetivo"]     .group-dot { background: #C09020; }
+  .group[data-cat="adjetivo"]     .group-tip { border-left-color: #C09020; }
+  .group[data-cat="numero"]       .group-dot { background: #8090A8; }
+  .group[data-cat="numero"]       .group-tip { border-left-color: #8090A8; }
+  .group[data-cat="lingua"]       .group-dot { background: var(--pink); }
+  .group[data-cat="lingua"]       .group-tip { border-left-color: var(--pink); }
+  .group[data-cat="interrogativo"].group-dot { background: var(--teal); }
+  .group[data-cat="interrogativo"].group-tip { border-left-color: var(--teal); }
+  .group[data-cat="nome-proprio"] .group-dot { background: #C06870; }
+  .group[data-cat="nome-proprio"] .group-tip { border-left-color: #C06870; }
+  .group[data-cat="conectivo"]    .group-dot { background: var(--indigo); }
+  .group[data-cat="conectivo"]    .group-tip { border-left-color: var(--indigo); }
+  .group[data-cat="tone-summary"] .group-dot { background: #A0A0A0; }
+
+  /* ===================== TONE SUMMARY ===================== */
+  .tone-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .tone-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .tone-summary-grid .tone-block {
+    font-size: 13px;
+    margin: 0 0 10px;
+  }
+
+  .tone-card-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--subtle);
+  }
+
+  .tone-card-example {
+    font-size: 12px;
+    margin-top: 8px;
+    color: var(--text);
+  }
+
+  .tone-card-example .dim { opacity: 0.4; }

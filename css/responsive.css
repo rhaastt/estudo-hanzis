@@ -1,0 +1,27 @@
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 600px) {
+    .hero { padding: 60px 20px 40px; }
+    .guide-wrap, .flashcards-wrap, .quiz-wrap, .paises-wrap { padding: 0 20px 60px; }
+    .tabs { display: none; }
+    .hanzi-table { display: block; overflow-x: auto; }
+    .fc-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .quiz-opts { grid-template-columns: 1fr; }
+    .country-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+
+    body { padding-bottom: 76px; }
+
+    .mobile-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+      padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+    }
+  }
