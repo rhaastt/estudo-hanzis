@@ -43,7 +43,73 @@ export const HSK_LEVELS = {
   na:        1, shen:       1, me:       1,
   nar:       1, zenmeyang:  1,
 
+  // ── NOVOS VERBOS HSK1
+  ai:           1, chi:      1, du:        1,
+  'hui-can':    1, 'hui-return': 1,
+  kai:          1, kan:      1, kanjian:   1,
+  mai:          1, neng:     1, qu:        1,
+  shuijiao:     1, ting:     1, xiang:     1,
+  'xie-write':  1, you:      1, zhu:       1,
+  xiayu:        1, meiyou:   1, zaijian:   1,
+  duibuqi:      1, bukeqi:   1, meiguanxi: 1,
+  'wei-hello':  1,
+
+  // ── NOVOS ADVÉRBIOS HSK1
+  tai:          1,
+
+  // ── NOVA PARTÍCULA HSK1
+  le:           1,
+
+  // ── NOVOS ADJETIVOS HSK1
+  hao:     1, haochi: 1, leng:  1,
+  re:      1, duo:    1, shao:  1,
+
+  // ── NOVOS NÚMEROS HSK1
+  'yi-num': 1, er:  1, san: 1,
+  si:       1, wu:  1, liu: 1,
+  qi:       1, ba:  1, jiu: 1,
+  'shi-ten': 1,
+
+  // ── NOVA LÍNGUA HSK1
+  hanyu:    1,
+
+  // ── NOVOS INTERROGATIVOS HSK1
+  duoshao:  1, ji:   1, shei: 1, zenme: 1,
+
+  // ── NOVOS SUBSTANTIVOS HSK1
+  // família
+  baba:     1, mama:     1, erzi:     1, nver:      1,
+  // pessoas
+  laoshi:   1, xuesheng: 1, tongxue:  1,
+  xiansheng: 1, xiaojie: 1, ren:      1,
+  // lugares
+  jia:      1, xuexiao:  1, shangdian: 1, fandian:  1,
+  // transporte
+  chuzuche: 1, feiji:    1,
+  // objetos
+  shu:      1, beizi:    1, diannao:  1, dianshi:  1,
+  yifu:     1, yizi:     1, zhuozi:   1,
+  // animais
+  gou:      1, mao:      1,
+  // comida e bebida
+  pingguo:  1, cai:      1, mifan:    1,
+  shuiguo:  1, shui:     1,
+  // classificadores
+  ge:       1, ben:      1, 'xie-some': 1, kuai:    1,
+  // tempo
+  jintian:  1, mingtian: 1, zuotian:  1, xianzai:  1,
+  xiawu:    1, zhongwu:  1, xingqi:   1, nian:     1,
+  yue:      1, fenzhong: 1, shihou:   1, dian:     1,
+  // posição
+  shang:    1, xia:      1, li:       1,
+  shangmian: 1, xiamian: 1, qianmian: 1, houmian:  1,
+  // geral
+  qian:     1, dongxi:   1, tianqi:   1, mingzi:   1,
+  sui:      1,
+
   // ── NOMES PRÓPRIOS (próprios não entram no HSK)
+  beijing:       null,
+  zhongguo:      null,
   'lisbon-daxue':        null,
   wenxuexi:              null,
   jianada:               null,
