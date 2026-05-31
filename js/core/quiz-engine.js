@@ -1,4 +1,4 @@
-import { hanziList } from '../data.js';
+import { hanziList } from '../data/catalog.js';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -15,12 +15,19 @@ function activePool(selectedCategories) {
     : hanziList.filter(h => selectedCategories.includes(h.category));
 }
 
-export function poolSize(selectedCategories) {
-  return activePool(selectedCategories).length;
+export function eligiblePool(mode, selectedCategories) {
+  const pool = activePool(selectedCategories);
+  return mode === 'stroke-order'
+    ? pool.filter(item => [...item.hanzi].length === 1)
+    : pool;
+}
+
+export function poolSize(mode, selectedCategories) {
+  return eligiblePool(mode, selectedCategories).length;
 }
 
 export function buildQuestions(mode, selectedCategories, count) {
-  let pool = shuffle(activePool(selectedCategories));
+  let pool = shuffle(eligiblePool(mode, selectedCategories));
   if (count !== 'all') pool = pool.slice(0, count);
 
   return pool.map(item => {
@@ -61,8 +68,7 @@ export function buildQuestions(mode, selectedCategories, count) {
 }
 
 export function buildStrokeQuestions(selectedCategories, count) {
-  let pool = shuffle(activePool(selectedCategories))
-    .filter(item => [...item.hanzi].length === 1);
+  let pool = shuffle(eligiblePool('stroke-order', selectedCategories));
   if (count !== 'all') pool = pool.slice(0, count);
   return pool;
 }

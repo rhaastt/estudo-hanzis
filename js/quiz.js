@@ -1,4 +1,4 @@
-import { categories, hanziList } from './data.js';
+import { categories, hanziList } from './data/catalog.js';
 import { state, COUNT_OPTIONS, COUNT_LABELS } from './core/quiz-state.js';
 import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engine.js';
 import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
@@ -22,7 +22,11 @@ function loadSettings() {
 }
 
 // ── SELECTOR HELPERS ──────────────────────────────────────────────
-function updateCountButtons(available) {
+function updateCountButtons() {
+  const available = poolSize('hanzi-to-trans', state.categories);
+  const availabilityLabel = count =>
+    `${count} ${count === 1 ? 'disponível' : 'disponíveis'}`;
+
   if (state.count !== 'all' && state.count > available) {
     state.count = 'all';
     saveSettings();
@@ -36,11 +40,15 @@ function updateCountButtons(available) {
   });
 
   const hint = container.querySelector('#quizAvailableHint');
-  if (hint) hint.textContent = `${available} disponível${available !== 1 ? 's' : ''}`;
+  if (hint) hint.textContent = availabilityLabel(available);
 
   container.querySelectorAll('.quiz-mode-card').forEach(card => {
-    card.disabled = available === 0;
-    card.classList.toggle('quiz-mode-card--empty', available === 0);
+    const modeAvailable = poolSize(card.dataset.mode, state.categories);
+    const isEmpty = modeAvailable === 0;
+    card.disabled = isEmpty;
+    card.classList.toggle('quiz-mode-card--empty', isEmpty);
+    card.querySelector('.quiz-mode-availability').textContent =
+      availabilityLabel(modeAvailable);
   });
 }
 
@@ -63,6 +71,7 @@ function renderModeSelector() {
   container.innerHTML = `
     <div class="quiz-modes">
       <h2 class="quiz-modes-title">Escolha o modo</h2>
+      <p class="quiz-mode-error" id="quizModeError" hidden></p>
 
       <div class="quiz-settings">
         <div class="quiz-settings-row quiz-settings-row--top">
@@ -88,21 +97,25 @@ function renderModeSelector() {
           <div class="quiz-mode-glyph">汉</div>
           <div class="quiz-mode-name">Hanzi → Tradução</div>
           <div class="quiz-mode-hint">Veja o caractere, escolha o significado</div>
+          <div class="quiz-mode-availability"></div>
         </button>
         <button class="quiz-mode-card" data-mode="trans-to-hanzi">
           <div class="quiz-mode-glyph">文</div>
           <div class="quiz-mode-name">Tradução → Hanzi</div>
           <div class="quiz-mode-hint">Veja o significado, escolha o caractere</div>
+          <div class="quiz-mode-availability"></div>
         </button>
         <button class="quiz-mode-card" data-mode="pinyin-to-hanzi">
           <div class="quiz-mode-glyph quiz-mode-glyph--pinyin">pīn</div>
           <div class="quiz-mode-name">Pinyin → Hanzi</div>
           <div class="quiz-mode-hint">Veja o pinyin, escolha o caractere</div>
+          <div class="quiz-mode-availability"></div>
         </button>
         <button class="quiz-mode-card quiz-mode-card--stroke" data-mode="stroke-order">
           <div class="quiz-mode-glyph">描</div>
           <div class="quiz-mode-name">Escrita de Traços</div>
           <div class="quiz-mode-hint">Observe a animação e escreva o caractere</div>
+          <div class="quiz-mode-availability"></div>
         </button>
       </div>
     </div>
@@ -121,7 +134,7 @@ function renderModeSelector() {
         state.categories = allIds.every(id => next.includes(id)) ? [] : next;
       }
       updateCatPills();
-      updateCountButtons(poolSize(state.categories));
+      updateCountButtons();
       saveSettings();
     })
   );
@@ -140,7 +153,7 @@ function renderModeSelector() {
     btn.addEventListener('click', () => startQuiz(btn.dataset.mode))
   );
 
-  updateCountButtons(poolSize(state.categories));
+  updateCountButtons();
 }
 
 // ── QUIZ START ────────────────────────────────────────────────────
@@ -149,6 +162,14 @@ function startQuiz(mode) {
   state.questions = mode === 'stroke-order'
     ? buildStrokeQuestions(state.categories, state.count)
     : buildQuestions(mode, state.categories, state.count);
+  if (state.questions.length === 0) {
+    state.mode = null;
+    renderModeSelector();
+    const error = document.getElementById('quizModeError');
+    error.textContent = 'Nenhum item disponível para este modo com as categorias selecionadas.';
+    error.hidden = false;
+    return;
+  }
   state.current   = 0;
   state.score     = 0;
   state.answered  = false;

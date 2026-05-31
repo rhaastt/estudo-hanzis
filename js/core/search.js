@@ -1,5 +1,5 @@
-import { hanziList } from '../data.js';
-import { countryList } from '../countries.js';
+import { vocabularyList } from '../data/catalog.js';
+import { countryList } from '../data/countries.js';
 import { HSK_LEVELS } from './hsk-levels.js';
 
 export function normalize(str) {
@@ -21,8 +21,7 @@ export function normalize(str) {
 function buildIndex() {
   const entries = [];
 
-  for (const h of hanziList) {
-    if (h.category === 'pais') continue;
+  for (const h of vocabularyList) {
     const exText = (h.examples ?? []).map(e => `${e.zh} ${e.pt ?? ''}`).join(' ');
     const core = normalize([
       h.hanzi, h.pinyin, h.translation, h.fcTranslation,

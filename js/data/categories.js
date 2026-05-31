@@ -1,0 +1,65 @@
+export const categories = [
+  { id: 'all', label: 'Todos' },
+  {
+    id: 'pronome', label: 'Pronomes',
+    guideTitle: 'Pronomes Pessoais e Demonstrativos',
+    guideTip: '💡 <strong>Padrão visual:</strong> 我 (eu), 你 (você), 他 (ele) e 她 (ela) têm pinyin idêntico — <em>tā</em>. A diferença está no radical: 他 tem 亻(pessoa) e 她 tem 女 (mulher). Adicione 们 para pluralizar. Demonstrativos: 这 (este/próximo) ↔ 那 (aquele/distante).',
+    guideLastCol: 'Dica mnemônica',
+  },
+  {
+    id: 'verbo', label: 'Verbos',
+    guideTitle: 'Verbos',
+    guideTip: '💡 <strong>Verbos em chinês não conjugam.</strong> O mesmo caractere serve para todos os tempos e pessoas: 我说, 你说, 他说. O contexto e advérbios de tempo marcam quando a ação ocorre. 是 vs 叫: 是 identifica ("sou brasileiro"); 叫 é específico para nome ("me chamo João").',
+    guideLastCol: 'Dica mnemônica',
+  },
+  {
+    id: 'adverbio', label: 'Advérbios',
+    guideTitle: 'Advérbios',
+    guideTip: '💡 <strong>Advérbios sempre ficam antes do verbo ou adjetivo.</strong> Exemplo: 我也很高兴 — "eu também muito feliz" → "estou muito feliz também". 很 (hěn) é intensificador obrigatório com adjetivos: sem ele, a frase soa contrastiva.',
+    guideLastCol: 'Exemplo rápido',
+  },
+  {
+    id: 'particula', label: 'Partículas',
+    guideTitle: 'Partículas Gramaticais',
+    guideTip: '💡 <strong>Partículas são funcionais e sempre átonas.</strong> 吗 transforma qualquer afirmação em pergunta sim/não. 呢 pede confirmação ou continua o raciocínio. 的 liga modificador ao substantivo — indispensável para possessivos: 我的 (meu), 你的 (seu).',
+    guideLastCol: 'Uso',
+  },
+  {
+    id: 'substantivo', label: 'Substantivos',
+    guideTitle: 'Substantivos',
+    guideTip: '💡 <strong>Padrão de construção:</strong> [país] + 人 = nacionalidade | [país] + 语/文 = idioma. Substantivos em chinês não têm gênero gramatical — a distinção 男/女 é feita com adjetivos modificadores.',
+    guideLastCol: 'Dica',
+  },
+  {
+    id: 'adjetivo', label: 'Adjetivos',
+    guideTitle: 'Adjetivos',
+    guideTip: '💡 <strong>Adjetivos em chinês são predicados.</strong> Dispensam cópula: 她很漂亮 = "ela muito bonita" → "ela é muito bonita". 很 (hěn) precede o adjetivo na maioria dos casos — sem ele, a frase soa contrastiva ou enfática.',
+    guideLastCol: 'Dica',
+  },
+  {
+    id: 'numero', label: 'Números',
+    guideTitle: 'Números',
+    guideTip: '💡 <strong>Zero tem duas formas:</strong> 零 (líng) é o caractere formal; 〇 é a forma circular usada em datas, telefones e CEPs. Os dígitos de 1 a 9: 一二三四五六七八九; dezena: 十 (shí).',
+    guideLastCol: 'Nota',
+  },
+  {
+    id: 'lingua', label: 'Língua',
+    guideTitle: 'Língua e Cultura',
+    guideTip: '💡 <strong>语 vs 文:</strong> 语 enfatiza a língua <em>falada</em> (汉语 = mandarim oral); 文 abrange escrita, literatura e cultura (中文 = sistema escrito chinês). Na prática, para "falar português" diz-se 说葡萄牙语. 和 (hé) é a conjunção coordenativa mais básica.',
+    guideLastCol: 'Dica',
+  },
+  {
+    id: 'interrogativo', label: 'Interrogativos',
+    guideTitle: 'Interrogativos',
+    guideTip: '💡 <strong>什 e 么 raramente aparecem sozinhos.</strong> 什么 = "o quê?"; em composição: 为什么 (por quê?), 什么时候 (quando?). 哪 (qual/onde) forma 哪儿/哪里 (onde). 怎么样 avalia estado ou qualidade: "como está/é?".',
+    guideLastCol: 'Contexto',
+  },
+  {
+    id: 'nome-proprio', label: 'Nomes Próprios',
+    guideTitle: 'Nomes Próprios e Lugares',
+    guideTip: '💡 <strong>Transliterações fonéticas</strong> aproximam a pronúncia do idioma de origem: 里斯本 soa como "Lisboa"; 加拿大 soa como "Kanada". Alguns nomes combinam transliteração com significado: 东方 (oriente) é semântico.',
+    guideLastCol: 'Origem',
+  },
+  { id: 'conectivo', label: 'Conectivos' },
+  { id: 'pais', label: 'Países' },
+];

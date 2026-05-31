@@ -15,6 +15,12 @@
     margin-bottom: 28px;
   }
 
+  .quiz-mode-error {
+    margin: -16px 0 20px;
+    color: #B04040;
+    font-size: 13px;
+  }
+
   /* Settings panel */
   .quiz-settings {
     background: white;
@@ -189,6 +195,14 @@
     font-size: 12px;
     color: var(--subtle);
     line-height: 1.4;
+  }
+
+  .quiz-mode-availability {
+    color: var(--subtle);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   /* Question screen */

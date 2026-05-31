@@ -1,5 +1,5 @@
-import { categories, hanziList } from './data.js';
-import { countryList } from './countries.js';
+import { categories, hanziList } from './data/catalog.js';
+import { countryList } from './data/countries.js';
 import {
   createGuideGroup,
   createFlashCard,
@@ -57,19 +57,6 @@ const cmdkInput   = document.getElementById('cmdkInput');
 const cmdkResults = document.getElementById('cmdkResults');
 
 // ── VALIDATION ────────────────────────────────────────────────
-function validate() {
-  const ids = hanziList.map(h => h.id);
-  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
-  if (dupes.length) console.warn('[data] Duplicate IDs:', dupes);
-
-  const catIds = new Set(categories.map(c => c.id));
-  for (const h of hanziList) {
-    if (!catIds.has(h.category)) {
-      console.warn(`[data] Orphan category "${h.category}" on item "${h.id}"`);
-    }
-  }
-}
-
 // ── GUIDE ─────────────────────────────────────────────────────
 function renderGuide() {
   guideContainer.innerHTML = '';
@@ -486,7 +473,6 @@ document.addEventListener('keydown', e => {
 
 // ── INIT ─────────────────────────────────────────────────────
 function init() {
-  validate();
   renderFilters();
   renderGuide();
   state.filteredItems = computeFiltered();
