@@ -70,22 +70,24 @@ function renderGuide() {
 }
 
 // ── HANZI WRITER ─────────────────────────────────────────────
-const CAT_COLOR = {
-  pronome: '#4070C0', verbo: '#B04040', adverbio: '#307A40',
-  particula: '#A06020', substantivo: '#7040B0', adjetivo: '#8A6000',
-  numero: '#3A5080', lingua: '#A04090', interrogativo: '#207860',
-  'nome-proprio': '#8A2A30', conectivo: '#808000',
+const HSK_COLOR = {
+  1: '#1E6B2E',
+  2: '#0D4A80',
+  3: '#7A4A00',
+  4: '#4A1E7A',
 };
+
+const getHskColor = id => HSK_COLOR[HSK_LEVELS[id]] ?? '#505050';
 
 function initHanziWriters() {
   if (typeof HanziWriter === 'undefined') return;
   fcGrid.querySelectorAll('.fc-hw-target:not([data-hw-initialized])').forEach(el => {
-    const cat = el.closest('.fc-item')?.dataset.cat ?? '';
+    const id = el.closest('.fc-item')?.dataset.id;
     HanziWriter.create(el, el.dataset.hw, {
       width: 90,
       height: 90,
       padding: 5,
-      strokeColor: CAT_COLOR[cat] ?? '#333',
+      strokeColor: getHskColor(id),
       outlineColor: 'rgba(0,0,0,0.12)',
       showCharacter: true,
       showOutline: true,
@@ -107,7 +109,7 @@ function openHwModal(item) {
 
   hwWriter = createStrokeWriter(hwModalCanvas, item.hanzi, {
     width: 300, height: 300, padding: 20,
-    strokeColor:  CAT_COLOR[item.category] ?? '#333',
+    strokeColor:  getHskColor(item.id),
     outlineColor: 'rgba(0,0,0,0.12)',
     showCharacter: true,
     showOutline: true,

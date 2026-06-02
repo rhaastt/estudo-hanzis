@@ -82,13 +82,19 @@ export function createFlashCard(item) {
   const shortCat = item.categoryLabel.split(' · ')[0];
   const catBadge = `<span class="fc-cat-badge fc-cat-badge--${item.category}">${shortCat}</span>`;
 
+  const hskBadge = hskLevel != null
+    ? `<span class="fc-hsk-badge">HSK ${hskLevel}</span>`
+    : '';
+
   card.innerHTML = `
     <div class="fc-inner">
       <div class="fc-front">
+        ${hskBadge}
         ${frontHanzi}
         <div class="fc-hint">clique para revelar</div>
       </div>
       <div class="fc-back">
+        ${hskBadge}
         <div class="fc-pinyin">${item.pinyin}</div>
         <div class="fc-translation">${translation}</div>
         <div class="fc-back-meta">
