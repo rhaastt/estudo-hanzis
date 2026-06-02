@@ -144,28 +144,28 @@
   .group:nth-child(13) { animation-delay: 0.65s }
 
   /* ===================== GROUP COLORS — via data-cat (ordem não importa) ===================== */
-  .group[data-cat="pronome"]      .group-dot { background: var(--blue); }
-  .group[data-cat="pronome"]      .group-tip { border-left-color: var(--blue); }
-  .group[data-cat="verbo"]        .group-dot { background: var(--red); }
-  .group[data-cat="verbo"]        .group-tip { border-left-color: var(--red); }
-  .group[data-cat="adverbio"]     .group-dot { background: var(--green); }
-  .group[data-cat="adverbio"]     .group-tip { border-left-color: var(--green); }
-  .group[data-cat="particula"]    .group-dot { background: var(--orange); }
-  .group[data-cat="particula"]    .group-tip { border-left-color: var(--orange); }
-  .group[data-cat="substantivo"]  .group-dot { background: var(--purple); }
-  .group[data-cat="substantivo"]  .group-tip { border-left-color: var(--purple); }
-  .group[data-cat="adjetivo"]     .group-dot { background: #C09020; }
-  .group[data-cat="adjetivo"]     .group-tip { border-left-color: #C09020; }
-  .group[data-cat="numero"]       .group-dot { background: #8090A8; }
-  .group[data-cat="numero"]       .group-tip { border-left-color: #8090A8; }
-  .group[data-cat="lingua"]       .group-dot { background: var(--pink); }
-  .group[data-cat="lingua"]       .group-tip { border-left-color: var(--pink); }
-  .group[data-cat="interrogativo"].group-dot { background: var(--teal); }
-  .group[data-cat="interrogativo"].group-tip { border-left-color: var(--teal); }
-  .group[data-cat="nome-proprio"] .group-dot { background: #C06870; }
-  .group[data-cat="nome-proprio"] .group-tip { border-left-color: #C06870; }
-  .group[data-cat="conectivo"]    .group-dot { background: var(--indigo); }
-  .group[data-cat="conectivo"]    .group-tip { border-left-color: var(--indigo); }
+  .group[data-cat="pronoun"]      .group-dot { background: var(--blue); }
+  .group[data-cat="pronoun"]      .group-tip { border-left-color: var(--blue); }
+  .group[data-cat="verb"]        .group-dot { background: var(--red); }
+  .group[data-cat="verb"]        .group-tip { border-left-color: var(--red); }
+  .group[data-cat="adverb"]     .group-dot { background: var(--green); }
+  .group[data-cat="adverb"]     .group-tip { border-left-color: var(--green); }
+  .group[data-cat="particle"]    .group-dot { background: var(--orange); }
+  .group[data-cat="particle"]    .group-tip { border-left-color: var(--orange); }
+  .group[data-cat="noun"]  .group-dot { background: var(--purple); }
+  .group[data-cat="noun"]  .group-tip { border-left-color: var(--purple); }
+  .group[data-cat="adjective"]     .group-dot { background: #C09020; }
+  .group[data-cat="adjective"]     .group-tip { border-left-color: #C09020; }
+  .group[data-cat="number"]       .group-dot { background: #8090A8; }
+  .group[data-cat="number"]       .group-tip { border-left-color: #8090A8; }
+  .group[data-cat="language"]       .group-dot { background: var(--pink); }
+  .group[data-cat="language"]       .group-tip { border-left-color: var(--pink); }
+  .group[data-cat="interrogative"].group-dot { background: var(--teal); }
+  .group[data-cat="interrogative"].group-tip { border-left-color: var(--teal); }
+  .group[data-cat="proper-noun"] .group-dot { background: #C06870; }
+  .group[data-cat="proper-noun"] .group-tip { border-left-color: #C06870; }
+  .group[data-cat="connector"]    .group-dot { background: var(--indigo); }
+  .group[data-cat="connector"]    .group-tip { border-left-color: var(--indigo); }
   .group[data-cat="tone-summary"] .group-dot { background: #A0A0A0; }
 
   /* ===================== TONE SUMMARY ===================== */

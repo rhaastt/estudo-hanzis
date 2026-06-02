@@ -9,13 +9,13 @@ import {
 } from '../js/core/quiz-engine.js';
 
 test('regular quiz modes keep countries eligible', () => {
-  assert.equal(poolSize('hanzi-to-trans', ['pais']), 100);
-  assert.equal(buildQuestions('hanzi-to-trans', ['pais'], 5).length, 5);
+  assert.equal(poolSize('hanzi-to-trans', ['country']), 100);
+  assert.equal(buildQuestions('hanzi-to-trans', ['country'], 5).length, 5);
 });
 
 test('stroke-order mode excludes countries', () => {
-  assert.equal(poolSize('stroke-order', ['pais']), 0);
-  assert.deepEqual(buildStrokeQuestions(['pais'], 'all'), []);
+  assert.equal(poolSize('stroke-order', ['country']), 0);
+  assert.deepEqual(buildStrokeQuestions(['country'], 'all'), []);
 });
 
 test('stroke-order mode only includes single-character items', () => {

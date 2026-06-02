@@ -3,6 +3,7 @@ import { state, COUNT_OPTIONS, COUNT_LABELS } from './core/quiz-state.js';
 import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engine.js';
 import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
 import { createStrokeWriter, animateWriter, startWriterQuiz } from './services/hanzi-writer.js';
+import { shortTranslation } from './core/vocabulary.js';
 
 const container = document.getElementById('quizContainer');
 
@@ -218,7 +219,7 @@ function renderQuestion() {
                 <div class="quiz-opt-back">
                   <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
                   <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
-                  <div class="quiz-opt-back-trans">${src.fcTranslation ?? src.translation}</div>
+                  <div class="quiz-opt-back-trans">${shortTranslation(src)}</div>
                 </div>
               </div>
             </div>`;
@@ -279,7 +280,7 @@ function renderStrokeQuestion() {
       <div class="quiz-stroke-wrap">
         <p class="quiz-q-label">Observe a animação e escreva</p>
         <div class="quiz-stroke-prompt">
-          <div class="quiz-stroke-trans">${item.fcTranslation ?? item.translation}</div>
+          <div class="quiz-stroke-trans">${shortTranslation(item)}</div>
           <div class="quiz-stroke-pinyin">${item.pinyin}</div>
         </div>
         <div class="quiz-stroke-canvas" id="quizHWCanvas"></div>

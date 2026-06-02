@@ -1,4 +1,4 @@
-import { HSK_LEVELS } from '../core/hsk-levels.js';
+import { inferTonesFromPinyin } from '../core/vocabulary.js';
 import { categories } from './categories.js';
 import { countryList } from './countries.js';
 import { vocabularyList } from './vocabulary.js';
@@ -7,11 +7,20 @@ const countryItems = countryList.map(c => ({
   id: `pais-${c.id}`,
   hanzi: c.hanzi,
   pinyin: c.pinyin,
-  tone: 0,
-  category: 'pais',
-  categoryLabel: 'País',
-  translation: c.name,
-  fcTranslation: c.name,
+  tones: inferTonesFromPinyin(c.pinyin),
+  category: 'country',
+  hsk: null,
+  labels: {
+    pt: { category: 'País' },
+  },
+  translations: {
+    pt: {
+      primary: c.name,
+      short: c.name,
+      mnemonic: '',
+    },
+  },
+  examples: [],
 }));
 
 const hanziList = [...vocabularyList, ...countryItems];
@@ -32,7 +41,6 @@ export function validateCatalog({
   categories: categoryItems = categories,
   vocabularyList: vocabularyItems = vocabularyList,
   countryItems: derivedCountryItems = countryItems,
-  hskLevels = HSK_LEVELS,
 } = {}) {
   const errors = [];
   const catalogItems = [...vocabularyItems, ...derivedCountryItems];
@@ -54,18 +62,30 @@ export function validateCatalog({
     errors.push(`Unknown categories: ${invalidCategories.join(', ')}`);
   }
 
-  const vocabularyIds = new Set(vocabularyItems.map(item => item.id));
-  const missingHskLevels = vocabularyItems
-    .filter(item => !Object.hasOwn(hskLevels, item.id))
-    .map(item => item.id);
-  if (missingHskLevels.length) {
-    errors.push(`Missing explicit HSK levels: ${missingHskLevels.join(', ')}`);
-  }
-
-  const orphanHskLevels = Object.keys(hskLevels)
-    .filter(id => !vocabularyIds.has(id));
-  if (orphanHskLevels.length) {
-    errors.push(`HSK levels without vocabulary items: ${orphanHskLevels.join(', ')}`);
+  for (const item of catalogItems) {
+    if (!Array.isArray(item.tones) || item.tones.length === 0 ||
+        item.tones.some(tone => !Number.isInteger(tone) || tone < 0 || tone > 4)) {
+      errors.push(`Invalid tones on item: ${item.id}`);
+    }
+    if (!Object.hasOwn(item, 'hsk') ||
+        (item.hsk !== null && (!Number.isInteger(item.hsk) || item.hsk < 1 || item.hsk > 6))) {
+      errors.push(`Invalid HSK level on item: ${item.id}`);
+    }
+    if (!item.translations?.pt?.primary || !item.translations?.pt?.short) {
+      errors.push(`Missing Portuguese translation on item: ${item.id}`);
+    }
+    if (!item.labels?.pt?.category) {
+      errors.push(`Missing Portuguese category label on item: ${item.id}`);
+    }
+    if (!Array.isArray(item.examples)) {
+      errors.push(`Invalid examples on item: ${item.id}`);
+      continue;
+    }
+    for (const example of item.examples) {
+      if (!example.zh || typeof example.translations?.pt !== 'string') {
+        errors.push(`Invalid example on item: ${item.id}`);
+      }
+    }
   }
 
   if (errors.length) {

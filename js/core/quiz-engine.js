@@ -1,4 +1,5 @@
 import { hanziList } from '../data/catalog.js';
+import { shortTranslation } from './vocabulary.js';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -37,10 +38,10 @@ export function buildQuestions(mode, selectedCategories, count) {
       questionText = item.hanzi;
       qClass       = 'quiz-q-hanzi';
       qSub         = '';
-      getVal       = h => h.fcTranslation ?? h.translation;
+      getVal       = h => shortTranslation(h);
       optClass     = '';
     } else if (mode === 'trans-to-hanzi') {
-      questionText = item.fcTranslation ?? item.translation;
+      questionText = shortTranslation(item);
       qClass       = '';
       qSub         = '';
       getVal       = h => h.hanzi;
@@ -49,7 +50,7 @@ export function buildQuestions(mode, selectedCategories, count) {
       // pinyin-to-hanzi: show translation as context to avoid tā ambiguity (他/她)
       questionText = item.pinyin;
       qClass       = 'quiz-q-pinyin';
-      qSub         = item.fcTranslation ?? item.translation;
+      qSub         = shortTranslation(item);
       getVal       = h => h.hanzi;
       optClass     = 'quiz-opt-hanzi';
     }

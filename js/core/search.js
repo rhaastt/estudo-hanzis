@@ -1,6 +1,12 @@
 import { vocabularyList } from '../data/catalog.js';
 import { countryList } from '../data/countries.js';
-import { HSK_LEVELS } from './hsk-levels.js';
+import {
+  categoryLabel,
+  exampleTranslation,
+  mnemonic,
+  primaryTranslation,
+  shortTranslation,
+} from './vocabulary.js';
 
 export function normalize(str) {
   return (str ?? '')
@@ -13,7 +19,7 @@ export function normalize(str) {
 
 // ── INDEX ─────────────────────────────────────────────────────
 // Each entry splits into two haystacks:
-//   core     — hanzi, pinyin, translation, fcTranslation, categoryLabel
+//   core     — hanzi, pinyin, primary translation, short translation
 //   extended — mnemonic + example text
 // A query must pass the full haystack for a match, but scoring rewards
 // core hits much more than extended-only hits.
@@ -22,24 +28,24 @@ function buildIndex() {
   const entries = [];
 
   for (const h of vocabularyList) {
-    const exText = (h.examples ?? []).map(e => `${e.zh} ${e.pt ?? ''}`).join(' ');
+    const exText = (h.examples ?? []).map(e => `${e.zh} ${exampleTranslation(e)}`).join(' ');
     const core = normalize([
-      h.hanzi, h.pinyin, h.translation, h.fcTranslation,
+      h.hanzi, h.pinyin, primaryTranslation(h), shortTranslation(h),
     ].filter(Boolean).join(' '));
-    const extended = normalize([h.mnemonic, exText, h.categoryLabel].filter(Boolean).join(' '));
+    const extended = normalize([mnemonic(h), exText, categoryLabel(h)].filter(Boolean).join(' '));
 
-    const hsk = HSK_LEVELS[h.id] ?? null;
+    const hsk = h.hsk;
     entries.push({
       id:          h.id,
       type:        'hanzi',
       tab:         'flashcards',
       hanzi:       h.hanzi,
       pinyin:      h.pinyin,
-      label:       h.fcTranslation ?? h.translation,
-      sub:         h.categoryLabel,
+      label:       shortTranslation(h),
+      sub:         categoryLabel(h),
       hsk,
       pinyinNorm:  normalize(h.pinyin),
-      labelNorm:   normalize(h.translation),
+      labelNorm:   normalize(primaryTranslation(h)),
       core,
       haystack:    core + ' ' + extended + (hsk ? ` hsk${hsk} hsk ${hsk}` : ' sem hsk'),
     });
