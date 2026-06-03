@@ -1,4 +1,5 @@
 import { HSK_LEVELS } from './core/hsk-levels.js';
+import { createFlipCard } from './core/flip-card.js';
 
 // tone → CSS class for pinyin (tone-5 = neutral)
 const PINYIN_CLASS = ['tone-5', 'tone-1', 'tone-2', 'tone-3', 'tone-4'];
@@ -62,11 +63,6 @@ export function createGuideGroup(category, items) {
 export function createFlashCard(item) {
   const hskLevel = HSK_LEVELS[item.id] ?? null;
 
-  const card = document.createElement('div');
-  card.className = `fc-item hsk-card-${hskLevel ?? 'none'}`;
-  card.dataset.id  = item.id;
-  card.dataset.cat = item.category;
-
   const translation = item.fcTranslation ?? item.translation;
   const ex  = (item.examples ?? [])[0] ?? { zh: '', pt: '' };
   const exText = ex.pt ? `${ex.zh} ${ex.pt}` : ex.zh;
@@ -86,27 +82,25 @@ export function createFlashCard(item) {
     ? `<span class="fc-hsk-badge">HSK ${hskLevel}</span>`
     : '';
 
-  card.innerHTML = `
-    <div class="fc-inner">
-      <div class="fc-front">
-        ${hskBadge}
-        ${frontHanzi}
-        <div class="fc-hint">clique para revelar</div>
-      </div>
-      <div class="fc-back">
-        ${hskBadge}
-        <div class="fc-pinyin">${item.pinyin}</div>
-        <div class="fc-translation">${translation}</div>
-        <div class="fc-back-meta">
-          ${catBadge}
-        </div>
-        <div class="fc-example">${exText}</div>
-        ${strokeBtn}
-      </div>
-    </div>
-  `.trim();
+  const flip = createFlipCard({
+    front: `
+      ${hskBadge}
+      ${frontHanzi}
+      <div class="fc-hint">clique para revelar</div>`,
+    back: `
+      ${hskBadge}
+      <div class="fc-pinyin">${item.pinyin}</div>
+      <div class="fc-translation">${translation}</div>
+      <div class="fc-back-meta">${catBadge}</div>
+      <div class="fc-example">${exText}</div>
+      ${strokeBtn}`,
+    classes: `fc-item hsk-card-${hskLevel ?? 'none'}`,
+  });
 
-  return card;
+  flip.dataset.id  = item.id;
+  flip.dataset.cat = item.category;
+
+  return flip;
 }
 
 export function createCategoryHeader(category, count) {

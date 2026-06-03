@@ -3,6 +3,8 @@ import { state, COUNT_OPTIONS, COUNT_LABELS } from './core/quiz-state.js';
 import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engine.js';
 import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
 import { createStrokeWriter, animateWriter, startWriterQuiz } from './services/hanzi-writer.js';
+import { createFlipCard } from './core/flip-card.js';
+import { getHskLevel } from './core/hsk-colors.js';
 import { shortTranslation } from './core/vocabulary.js';
 
 const container = document.getElementById('quizContainer');
@@ -195,6 +197,8 @@ function renderQuestion() {
     'pinyin-to-hanzi': 'Qual é o caractere?',
   };
 
+  const hskLvlQ = getHskLevel(q.optionItems[q.correctIndex].id);
+
   container.innerHTML = `
     <div class="quiz-screen">
       <div class="quiz-status">
@@ -206,25 +210,10 @@ function renderQuestion() {
       </div>
       <div class="quiz-q-wrap">
         <p class="quiz-q-label">${LABELS[state.mode]}</p>
-        <div class="quiz-q-text ${q.qClass}">${q.questionText}</div>
+        <div class="quiz-q-text ${q.qClass} hsk-card-${hskLvlQ ?? 'none'}">${q.questionText}</div>
         ${q.qSub ? `<p class="quiz-q-sub">${q.qSub}</p>` : ''}
       </div>
-      <div class="quiz-opts">
-        ${q.options.map((opt, i) => {
-          const src = q.optionItems[i];
-          return `
-            <div class="quiz-opt-card${q.optClass ? ` ${q.optClass}` : ''}" data-idx="${i}">
-              <div class="quiz-opt-inner">
-                <div class="quiz-opt-front">${opt}</div>
-                <div class="quiz-opt-back">
-                  <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
-                  <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
-                  <div class="quiz-opt-back-trans">${shortTranslation(src)}</div>
-                </div>
-              </div>
-            </div>`;
-        }).join('')}
-      </div>
+      <div class="quiz-opts" id="quizOpts"></div>
       <div class="quiz-foot">
         <button class="quiz-quit" id="quizQuit">Encerrar</button>
         <button class="quiz-next" id="quizNext" disabled>
@@ -233,6 +222,24 @@ function renderQuestion() {
       </div>
     </div>
   `.trim();
+
+  const optsEl = container.querySelector('#quizOpts');
+  q.options.forEach((opt, i) => {
+    const src   = q.optionItems[i];
+    const lvl   = getHskLevel(src.id);
+    const card  = createFlipCard({
+      front: opt,
+      back: `
+        <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
+        <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
+        <div class="quiz-opt-back-trans">${shortTranslation(src)}</div>`,
+      classes: `quiz-opt-card hsk-card-${lvl ?? 'none'}${q.optClass ? ` ${q.optClass}` : ''}`,
+    });
+    card.dataset.idx = i;
+    card.querySelector('.flip-front').classList.add('quiz-opt-front');
+    card.querySelector('.flip-back').classList.add('quiz-opt-back');
+    optsEl.appendChild(card);
+  });
 
   container.querySelectorAll('.quiz-opt-card').forEach(card =>
     card.addEventListener('click', () => handleAnswer(+card.dataset.idx))
@@ -367,22 +374,48 @@ function advance() {
 
 // ── RESULT ────────────────────────────────────────────────────────
 function renderResult(answeredTotal = state.questions.length) {
-  const total = answeredTotal;
-  const early = total < state.questions.length;
-  const pct   = total > 0 ? Math.round((state.score / total) * 100) : 0;
-  const msg   = total === 0 ? 'Quiz encerrado'
+  const total  = answeredTotal;
+  const early  = total < state.questions.length;
+  const pct    = total > 0 ? Math.round((state.score / total) * 100) : 0;
+  const wrong  = total - state.score;
+  const msg    = total === 0 ? 'Quiz encerrado'
     : pct >= 80 ? 'Excelente!' : pct >= 60 ? 'Bom trabalho!' : 'Continue praticando!';
-  const unit  = state.mode === 'stroke-order' ? 'perfeitas' : 'corretas';
+  const unit   = state.mode === 'stroke-order' ? 'perfeitas' : 'corretas';
+  const ringClass = pct >= 80 ? 'high' : pct >= 60 ? 'mid' : 'low';
+
+  // SVG ring: r=68 → circunferência ≈ 427
+  const r  = 68;
+  const c  = 2 * Math.PI * r;
+  const offset = c - (pct / 100) * c;
 
   container.innerHTML = `
     <div class="quiz-result">
-      <div class="quiz-result-pct">${pct}%</div>
+      <div class="quiz-result-ring">
+        <svg viewBox="0 0 160 160">
+          <circle class="quiz-result-ring-track" cx="80" cy="80" r="${r}"/>
+          <circle class="quiz-result-ring-fill quiz-result-ring-fill--${ringClass}"
+            cx="80" cy="80" r="${r}"
+            stroke-dasharray="${c}"
+            stroke-dashoffset="${offset}"/>
+        </svg>
+        <div class="quiz-result-pct">${pct}%</div>
+      </div>
       <h2 class="quiz-result-msg">${msg}</h2>
-      <p class="quiz-result-detail">${state.score} de ${total} ${unit}${early ? ` <span class="quiz-result-early">(encerrado na ${total + 1}ª pergunta)</span>` : ''}</p>
-      <button class="btn-reset" id="quizRestart">Reiniciar quiz</button>
+      <p class="quiz-result-detail">${state.score} de ${total} ${unit}${early ? ` <span class="quiz-result-early">(encerrado cedo)</span>` : ''}</p>
+      <div class="quiz-result-breakdown">
+        <span class="quiz-result-chip quiz-result-chip--correct">✓ ${state.score} ${unit}</span>
+        <span class="quiz-result-chip quiz-result-chip--wrong">✗ ${wrong} erradas</span>
+      </div>
+      <div class="quiz-result-actions">
+        <button class="quiz-retry" id="quizRetry">Tentar novamente</button>
+        <button class="btn-reset" id="quizRestart">Trocar modo</button>
+      </div>
     </div>
   `.trim();
 
+  document.getElementById('quizRetry').addEventListener('click', () => {
+    startQuiz(state.mode);
+  });
   document.getElementById('quizRestart').addEventListener('click', () => {
     state.mode = null;
     renderModeSelector();

@@ -138,44 +138,21 @@
     white-space: nowrap;
   }
 
-  /* -------- FLIP CARD -------- */
+  /* -------- FLASH CARD -------- */
   .fc-item {
-    perspective: 1000px;
     height: 200px;
     cursor: pointer;
     opacity: 0;
     animation: fadeUp 0.4s ease forwards;
   }
 
-  .fc-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: var(--card-radius);
-  }
-
-  .fc-item.flipped .fc-inner {
-    transform: rotateY(180deg);
-  }
-
-  .fc-front, .fc-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: var(--card-radius);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+  .fc-item .flip-front,
+  .fc-item .flip-back {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 24px;
-  }
-
-  .fc-back {
-    transform: rotateY(180deg);
   }
 
   .fc-hanzi {
@@ -251,24 +228,24 @@
   .hsk-card-4 .fc-hsk-badge { color: #4A1E7A; }
 
   /* -------- Cores por nível HSK -------- */
-  .hsk-card-1 .fc-front { background: #E8F7E9; }
-  .hsk-card-1 .fc-back  { background: #D4EFD6; }
+  .hsk-card-1 .flip-front { background: #E8F7E9; }
+  .hsk-card-1 .flip-back  { background: #D4EFD6; }
   .hsk-card-1 .fc-hanzi, .hsk-card-1 .fc-pinyin { color: #1E6B2E; }
 
-  .hsk-card-2 .fc-front { background: #E0EEFF; }
-  .hsk-card-2 .fc-back  { background: #CBE4FF; }
+  .hsk-card-2 .flip-front { background: #E0EEFF; }
+  .hsk-card-2 .flip-back  { background: #CBE4FF; }
   .hsk-card-2 .fc-hanzi, .hsk-card-2 .fc-pinyin { color: #0D4A80; }
 
-  .hsk-card-3 .fc-front { background: #FFF5D8; }
-  .hsk-card-3 .fc-back  { background: #FFEFC0; }
+  .hsk-card-3 .flip-front { background: #FFF5D8; }
+  .hsk-card-3 .flip-back  { background: #FFEFC0; }
   .hsk-card-3 .fc-hanzi, .hsk-card-3 .fc-pinyin { color: #7A4A00; }
 
-  .hsk-card-4 .fc-front { background: #F0E8FF; }
-  .hsk-card-4 .fc-back  { background: #E4D4FF; }
+  .hsk-card-4 .flip-front { background: #F0E8FF; }
+  .hsk-card-4 .flip-back  { background: #E4D4FF; }
   .hsk-card-4 .fc-hanzi, .hsk-card-4 .fc-pinyin { color: #4A1E7A; }
 
-  .hsk-card-none .fc-front { background: #EEECEA; }
-  .hsk-card-none .fc-back  { background: #E2E0DC; }
+  .hsk-card-none .flip-front { background: #EEECEA; }
+  .hsk-card-none .flip-back  { background: #E2E0DC; }
   .hsk-card-none .fc-hanzi, .hsk-card-none .fc-pinyin { color: #505050; }
 
 

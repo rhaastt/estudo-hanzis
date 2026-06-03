@@ -13,6 +13,7 @@ import {
 } from './services/hanzi-writer.js';
 import { search } from './core/search.js';
 import { HSK_LEVELS, HSK_FILTER_OPTIONS } from './core/hsk-levels.js';
+import { HSK_COLOR, getHskColor } from './core/hsk-colors.js';
 
 const state = {
   activeFilter: 'all',
@@ -70,15 +71,6 @@ function renderGuide() {
 }
 
 // ── HANZI WRITER ─────────────────────────────────────────────
-const HSK_COLOR = {
-  1: '#1E6B2E',
-  2: '#0D4A80',
-  3: '#7A4A00',
-  4: '#4A1E7A',
-};
-
-const getHskColor = id => HSK_COLOR[HSK_LEVELS[id]] ?? '#505050';
-
 function initHanziWriters() {
   if (typeof HanziWriter === 'undefined') return;
   fcGrid.querySelectorAll('.fc-hw-target:not([data-hw-initialized])').forEach(el => {
