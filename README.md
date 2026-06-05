@@ -112,7 +112,7 @@ Abra `http://localhost:8080` no navegador.
 ## Testes
 
 ```bash
-node --test tests/
+node --test 'tests/**/*.test.js'
 ```
 
 Cobre validação do catálogo, motor de quiz, busca e utilitários de vocabulário.
