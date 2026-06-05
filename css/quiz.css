@@ -323,20 +323,6 @@
 
   .quiz-opt-card:not(.flipped):hover .quiz-opt-front { border-color: #8A7868; }
 
-  /* Cores HSK na frente (hanzis como opção) */
-  .hsk-card-1 .quiz-opt-front { color: #1E6B2E; }
-  .hsk-card-2 .quiz-opt-front { color: #0D4A80; }
-  .hsk-card-3 .quiz-opt-front { color: #7A4A00; }
-  .hsk-card-4 .quiz-opt-front { color: #4A1E7A; }
-  .hsk-card-none .quiz-opt-front { color: #505050; }
-
-  /* Cores HSK na pergunta */
-  .hsk-card-1.quiz-q-hanzi, .hsk-card-1.quiz-q-pinyin { color: #1E6B2E; }
-  .hsk-card-2.quiz-q-hanzi, .hsk-card-2.quiz-q-pinyin { color: #0D4A80; }
-  .hsk-card-3.quiz-q-hanzi, .hsk-card-3.quiz-q-pinyin { color: #7A4A00; }
-  .hsk-card-4.quiz-q-hanzi, .hsk-card-4.quiz-q-pinyin { color: #4A1E7A; }
-  .hsk-card-none.quiz-q-hanzi, .hsk-card-none.quiz-q-pinyin { color: #505050; }
-
   .quiz-opt-back {
     background: white;
     border: 1.5px solid rgba(0,0,0,0.10);

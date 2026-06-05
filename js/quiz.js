@@ -196,8 +196,6 @@ function renderQuestion() {
     'pinyin-to-hanzi': 'Qual é o caractere?',
   };
 
-  const hskLvlQ = q.optionItems[q.correctIndex].hsk ?? null;
-
   container.innerHTML = `
     <div class="quiz-screen">
       <div class="quiz-status">
@@ -209,7 +207,7 @@ function renderQuestion() {
       </div>
       <div class="quiz-q-wrap">
         <p class="quiz-q-label">${LABELS[state.mode]}</p>
-        <div class="quiz-q-text ${q.qClass} hsk-card-${hskLvlQ ?? 'none'}">${q.questionText}</div>
+        <div class="quiz-q-text ${q.qClass}">${q.questionText}</div>
         ${q.qSub ? `<p class="quiz-q-sub">${q.qSub}</p>` : ''}
       </div>
       <div class="quiz-opts" id="quizOpts"></div>
@@ -225,14 +223,13 @@ function renderQuestion() {
   const optsEl = container.querySelector('#quizOpts');
   q.options.forEach((opt, i) => {
     const src   = q.optionItems[i];
-    const lvl   = src.hsk ?? null;
     const card  = createFlipCard({
       front: opt,
       back: `
         <div class="quiz-opt-back-hanzi">${src.hanzi}</div>
         <div class="quiz-opt-back-pinyin">${src.pinyin}</div>
         <div class="quiz-opt-back-trans">${shortTranslation(src)}</div>`,
-      classes: `quiz-opt-card hsk-card-${lvl ?? 'none'}${q.optClass ? ` ${q.optClass}` : ''}`,
+      classes: `quiz-opt-card${q.optClass ? ` ${q.optClass}` : ''}`,
     });
     card.dataset.idx = i;
     card.querySelector('.flip-front').classList.add('quiz-opt-front');
