@@ -71,24 +71,6 @@ function renderGuide() {
   guideContainer.appendChild(createToneSummary());
 }
 
-// ── HANZI WRITER ─────────────────────────────────────────────
-function initHanziWriters() {
-  if (typeof HanziWriter === 'undefined') return;
-  fcGrid.querySelectorAll('.fc-hw-target:not([data-hw-initialized])').forEach(el => {
-    const hsk = el.closest('.fc-item')?.dataset.hsk;
-    HanziWriter.create(el, el.dataset.hw, {
-      width: 90,
-      height: 90,
-      padding: 5,
-      strokeColor: hskColor(hsk ? Number(hsk) : null),
-      outlineColor: 'rgba(0,0,0,0.12)',
-      showCharacter: true,
-      showOutline: true,
-    });
-    el.dataset.hwInitialized = '1';
-  });
-}
-
 // ── STROKE-ORDER MODAL ───────────────────────────────────────
 let hwWriter = null;
 
@@ -173,7 +155,6 @@ function renderBatch() {
     fcGrid.appendChild(card);
   }
   state.renderedCount += slice.length;
-  initHanziWriters();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 

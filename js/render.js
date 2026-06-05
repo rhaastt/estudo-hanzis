@@ -77,9 +77,7 @@ export function createFlashCard(item) {
   const ex  = (item.examples ?? [])[0] ?? null;
   const exText = ex ? `${ex.zh} ${exampleTranslation(ex)}` : '';
   const isSingle = [...item.hanzi].length === 1;
-  const frontHanzi = isSingle
-    ? `<div class="fc-hw-target" data-hw="${item.hanzi}"></div>`
-    : `<div class="fc-hanzi">${item.hanzi}</div>`;
+  const frontHanzi = `<div class="fc-hanzi">${item.hanzi}</div>`;
 
   const strokeBtn = isSingle
     ? `<button class="fc-hw-btn" type="button"><i data-lucide="pen-tool"></i> Ver traços</button>`
