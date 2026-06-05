@@ -1,5 +1,13 @@
-import { HSK_LEVELS } from './core/hsk-levels.js';
 import { createFlipCard } from './core/flip-card.js';
+import {
+  primaryTranslation,
+  shortTranslation,
+  mnemonic,
+  categoryLabel,
+  firstTone,
+  exampleTranslation,
+  formatMnemonic,
+} from './core/vocabulary.js';
 
 // tone → CSS class for pinyin (tone-5 = neutral)
 const PINYIN_CLASS = ['tone-5', 'tone-1', 'tone-2', 'tone-3', 'tone-4'];
@@ -41,16 +49,18 @@ export function createGuideGroup(category, items) {
 
   const tbody = document.createElement('tbody');
   for (const item of items) {
-    const pClass = PINYIN_CLASS[item.tone] ?? 'tone-5';
-    const bClass = BLOCK_CLASS[item.tone]  ?? 'tn';
-    const bLabel = BLOCK_LABEL[item.tone]  ?? 'neutro';
+    const tone   = firstTone(item);
+    const pClass = PINYIN_CLASS[tone] ?? 'tone-5';
+    const bClass = BLOCK_CLASS[tone]  ?? 'tn';
+    const bLabel = BLOCK_LABEL[tone]  ?? 'neutro';
+    const tip    = mnemonic(item);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><span class="hanzi-char">${item.hanzi}</span></td>
       <td><span class="pinyin ${pClass}">${item.pinyin}</span></td>
       <td><span class="tone-block ${bClass}">${bLabel}</span></td>
-      <td class="translation">${item.translation}</td>
-      <td class="mnemonic">${item.mnemonic ?? ''}</td>
+      <td class="translation">${primaryTranslation(item)}</td>
+      <td class="mnemonic">${tip ? formatMnemonic(tip) : ''}</td>
     `.trim();
     tbody.appendChild(tr);
   }
@@ -61,11 +71,11 @@ export function createGuideGroup(category, items) {
 }
 
 export function createFlashCard(item) {
-  const hskLevel = HSK_LEVELS[item.id] ?? null;
+  const hskLevel = item.hsk ?? null;
 
-  const translation = item.fcTranslation ?? item.translation;
-  const ex  = (item.examples ?? [])[0] ?? { zh: '', pt: '' };
-  const exText = ex.pt ? `${ex.zh} ${ex.pt}` : ex.zh;
+  const translation = shortTranslation(item);
+  const ex  = (item.examples ?? [])[0] ?? null;
+  const exText = ex ? `${ex.zh} ${exampleTranslation(ex)}` : '';
   const isSingle = [...item.hanzi].length === 1;
   const frontHanzi = isSingle
     ? `<div class="fc-hw-target" data-hw="${item.hanzi}"></div>`
@@ -75,7 +85,7 @@ export function createFlashCard(item) {
     ? `<button class="fc-hw-btn" type="button"><i data-lucide="pen-tool"></i> Ver traços</button>`
     : '';
 
-  const shortCat = item.categoryLabel.split(' · ')[0];
+  const shortCat = categoryLabel(item).split(' · ')[0];
   const catBadge = `<span class="fc-cat-badge fc-cat-badge--${item.category}">${shortCat}</span>`;
 
   const hskBadge = hskLevel != null
@@ -99,6 +109,7 @@ export function createFlashCard(item) {
 
   flip.dataset.id  = item.id;
   flip.dataset.cat = item.category;
+  if (hskLevel != null) flip.dataset.hsk = hskLevel;
 
   return flip;
 }

@@ -12,8 +12,9 @@ import {
   startWriterQuiz,
 } from './services/hanzi-writer.js';
 import { search } from './core/search.js';
-import { HSK_LEVELS, HSK_FILTER_OPTIONS } from './core/hsk-levels.js';
-import { HSK_COLOR, getHskColor } from './core/hsk-colors.js';
+import { HSK_FILTER_OPTIONS } from './core/hsk.js';
+import { hskColor } from './core/hsk-colors.js';
+import { primaryTranslation } from './core/vocabulary.js';
 
 const state = {
   activeFilter: 'all',
@@ -74,12 +75,12 @@ function renderGuide() {
 function initHanziWriters() {
   if (typeof HanziWriter === 'undefined') return;
   fcGrid.querySelectorAll('.fc-hw-target:not([data-hw-initialized])').forEach(el => {
-    const id = el.closest('.fc-item')?.dataset.id;
+    const hsk = el.closest('.fc-item')?.dataset.hsk;
     HanziWriter.create(el, el.dataset.hw, {
       width: 90,
       height: 90,
       padding: 5,
-      strokeColor: getHskColor(id),
+      strokeColor: hskColor(hsk ? Number(hsk) : null),
       outlineColor: 'rgba(0,0,0,0.12)',
       showCharacter: true,
       showOutline: true,
@@ -93,7 +94,7 @@ let hwWriter = null;
 
 function openHwModal(item) {
   hwModalPinyin.textContent      = item.pinyin;
-  hwModalTranslation.textContent = item.fcTranslation ?? item.translation;
+  hwModalTranslation.textContent = primaryTranslation(item);
   hwModalHint.textContent        = '';
   hwModalCanvas.innerHTML        = '';
   hwModal.hidden = false;
@@ -101,7 +102,7 @@ function openHwModal(item) {
 
   hwWriter = createStrokeWriter(hwModalCanvas, item.hanzi, {
     width: 300, height: 300, padding: 20,
-    strokeColor:  getHskColor(item.id),
+    strokeColor:  hskColor(item.hsk ?? null),
     outlineColor: 'rgba(0,0,0,0.12)',
     showCharacter: true,
     showOutline: true,
@@ -227,7 +228,7 @@ mobileNav.addEventListener('click', e => {
 
 // ── FLASH CARD FILTERS (HSK level) ───────────────────────────
 function matchesHsk(item) {
-  const lvl = HSK_LEVELS[item.id] ?? null;
+  const lvl = item.hsk ?? null;
   if (state.activeFilter === 'all')  return true;
   if (state.activeFilter === 'none') return lvl === null;
   if (state.activeFilter === '4')    return lvl !== null && lvl >= 4;

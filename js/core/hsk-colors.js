@@ -1,5 +1,3 @@
-import { HSK_LEVELS } from './hsk-levels.js';
-
 export const HSK_COLOR = {
   1: '#1E6B2E',
   2: '#0D4A80',
@@ -7,5 +5,5 @@ export const HSK_COLOR = {
   4: '#4A1E7A',
 };
 
-export const getHskColor = id => HSK_COLOR[HSK_LEVELS[id]] ?? '#505050';
-export const getHskLevel = id => HSK_LEVELS[id] ?? null;
+// level (item.hsk) → cor do hanzi; null/5/6 caem no cinza padrão
+export const hskColor = level => HSK_COLOR[level] ?? '#505050';

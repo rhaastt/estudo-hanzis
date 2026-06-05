@@ -4,7 +4,6 @@ import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engi
 import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
 import { createStrokeWriter, animateWriter, startWriterQuiz } from './services/hanzi-writer.js';
 import { createFlipCard } from './core/flip-card.js';
-import { getHskLevel } from './core/hsk-colors.js';
 import { shortTranslation } from './core/vocabulary.js';
 
 const container = document.getElementById('quizContainer');
@@ -197,7 +196,7 @@ function renderQuestion() {
     'pinyin-to-hanzi': 'Qual é o caractere?',
   };
 
-  const hskLvlQ = getHskLevel(q.optionItems[q.correctIndex].id);
+  const hskLvlQ = q.optionItems[q.correctIndex].hsk ?? null;
 
   container.innerHTML = `
     <div class="quiz-screen">
@@ -226,7 +225,7 @@ function renderQuestion() {
   const optsEl = container.querySelector('#quizOpts');
   q.options.forEach((opt, i) => {
     const src   = q.optionItems[i];
-    const lvl   = getHskLevel(src.id);
+    const lvl   = src.hsk ?? null;
     const card  = createFlipCard({
       front: opt,
       back: `
