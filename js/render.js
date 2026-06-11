@@ -90,6 +90,8 @@ export function createFlashCard(item) {
     ? `<span class="fc-hsk-badge">HSK ${hskLevel}</span>`
     : '';
 
+  const markerBtn = `<button class="fc-marker-btn" data-id="${item.id}" type="button" title="Adicionar ao baralho">☆</button>`;
+
   const flip = createFlipCard({
     front: `
       ${hskBadge}
@@ -101,7 +103,8 @@ export function createFlashCard(item) {
       <div class="fc-translation">${translation}</div>
       <div class="fc-back-meta">${catBadge}</div>
       <div class="fc-example">${exText}</div>
-      ${strokeBtn}`,
+      ${strokeBtn}
+      ${markerBtn}`,
     classes: `fc-item hsk-card-${hskLevel ?? 'none'}`,
   });
 

@@ -1,7 +1,7 @@
 import { categories, hanziList } from './data/catalog.js';
 import { state, COUNT_OPTIONS, COUNT_LABELS } from './core/quiz-state.js';
 import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engine.js';
-import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
+import { loadQuizSettings, saveQuizSettings, loadBaralhos } from './services/storage.js';
 import { createStrokeWriter, animateWriter, startWriterQuiz } from './services/hanzi-writer.js';
 import { createFlipCard } from './core/flip-card.js';
 import { shortTranslation } from './core/vocabulary.js';
@@ -10,22 +10,35 @@ const container = document.getElementById('quizContainer');
 
 // ── SETTINGS PERSISTENCE ─────────────────────────────────────────
 function saveSettings() {
-  saveQuizSettings({ categories: state.categories, count: state.count });
+  saveQuizSettings({ categories: state.categories, count: state.count, deckId: state.deckId });
 }
 
 function loadSettings() {
   const saved = loadQuizSettings();
   if (!saved) return;
-  const validIds = new Set(categories.map(c => c.id));
+  const validCatIds = new Set(categories.map(c => c.id));
   if (Array.isArray(saved.categories))
-    state.categories = saved.categories.filter(id => validIds.has(id) && id !== 'all');
+    state.categories = saved.categories.filter(id => validCatIds.has(id) && id !== 'all');
   if (saved.count === 'all' || COUNT_OPTIONS.includes(saved.count))
     state.count = saved.count;
+  if (saved.deckId) {
+    const baralhos = loadBaralhos();
+    if (baralhos.find(b => b.id === saved.deckId)) state.deckId = saved.deckId;
+  }
+}
+
+// IDs do baralho ativo, ou null se nenhum selecionado
+function deckItemIds() {
+  if (!state.deckId) return null;
+  const b = loadBaralhos().find(b => b.id === state.deckId);
+  return b ? b.ids : [];
 }
 
 // ── SELECTOR HELPERS ──────────────────────────────────────────────
 function updateCountButtons() {
-  const available = poolSize('hanzi-to-trans', state.categories);
+  const ids = deckItemIds();
+  const cats = ids ? [] : state.categories;
+  const available = poolSize('hanzi-to-trans', cats, ids);
   const availabilityLabel = count =>
     `${count} ${count === 1 ? 'disponível' : 'disponíveis'}`;
 
@@ -45,7 +58,7 @@ function updateCountButtons() {
   if (hint) hint.textContent = availabilityLabel(available);
 
   container.querySelectorAll('.quiz-mode-card').forEach(card => {
-    const modeAvailable = poolSize(card.dataset.mode, state.categories);
+    const modeAvailable = poolSize(card.dataset.mode, cats, ids);
     const isEmpty = modeAvailable === 0;
     card.disabled = isEmpty;
     card.classList.toggle('quiz-mode-card--empty', isEmpty);
@@ -83,6 +96,17 @@ function renderModeSelector() {
             ${specificCats.map(c => `<button class="quiz-cat-pill${state.categories.includes(c.id) ? ' active' : ''}" data-cat="${c.id}">${c.label} <span class="quiz-cat-pill-count">${catItemCount[c.id]}</span></button>`).join('')}
           </div>
         </div>
+        ${(() => {
+          const baralhos = loadBaralhos();
+          if (!baralhos.length) return '';
+          return `<div class="quiz-settings-row quiz-deck-row">
+          <span class="quiz-settings-label">Baralho</span>
+          <div class="quiz-deck-pills">
+            <button class="quiz-deck-pill${!state.deckId ? ' active' : ''}" data-deck="">Nenhum</button>
+            ${baralhos.map(b => `<button class="quiz-deck-pill${state.deckId === b.id ? ' active' : ''}" data-deck="${b.id}">${b.nome} <span class="quiz-deck-pill-count">${b.ids.length}</span></button>`).join('')}
+          </div>
+        </div>`;
+        })()}
         <div class="quiz-settings-row">
           <span class="quiz-settings-label">Perguntas</span>
           <div class="quiz-count-group">
@@ -141,6 +165,17 @@ function renderModeSelector() {
     })
   );
 
+  container.querySelectorAll('.quiz-deck-pill').forEach(btn =>
+    btn.addEventListener('click', () => {
+      state.deckId = btn.dataset.deck || null;
+      container.querySelectorAll('.quiz-deck-pill').forEach(b =>
+        b.classList.toggle('active', b.dataset.deck === (state.deckId ?? ''))
+      );
+      updateCountButtons();
+      saveSettings();
+    })
+  );
+
   container.querySelectorAll('.quiz-count-btn').forEach(btn =>
     btn.addEventListener('click', () => {
       const val = btn.dataset.count;
@@ -160,10 +195,12 @@ function renderModeSelector() {
 
 // ── QUIZ START ────────────────────────────────────────────────────
 function startQuiz(mode) {
+  const ids  = deckItemIds();
+  const cats = ids ? [] : state.categories;
   state.mode      = mode;
   state.questions = mode === 'stroke-order'
-    ? buildStrokeQuestions(state.categories, state.count)
-    : buildQuestions(mode, state.categories, state.count);
+    ? buildStrokeQuestions(cats, state.count, ids)
+    : buildQuestions(mode, cats, state.count, ids);
   if (state.questions.length === 0) {
     state.mode = null;
     renderModeSelector();

@@ -9,4 +9,5 @@ export const state = {
   answered: false,
   categories: [],
   count: 10,
+  deckId: null,
 };

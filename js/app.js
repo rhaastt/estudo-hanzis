@@ -15,6 +15,8 @@ import { search } from './core/search.js';
 import { HSK_FILTER_OPTIONS } from './core/hsk.js';
 import { hskColor } from './core/hsk-colors.js';
 import { primaryTranslation } from './core/vocabulary.js';
+import { loadBaralhos, saveBaralhos } from './services/storage.js';
+import { criarBaralho, toggleItem, validarIds } from './core/baralhos.js';
 
 const state = {
   activeFilter: 'all',
@@ -26,11 +28,19 @@ const state = {
   observer: null,
 };
 
+const validIds = new Set(hanziList.map(h => h.id));
+
+const baralhoState = {
+  baralhos: loadBaralhos().map(b => { validarIds(b, validIds); return b; }),
+  activeId: null,
+};
+
 // category id → category object, for headers
 const categoryById = new Map(categories.map(c => [c.id, c]));
 
 const BATCH_SIZE = 24;
 
+const baralhoContainer = document.getElementById('baralhoContainer');
 const guideContainer  = document.getElementById('guideContainer');
 const filterContainer = document.getElementById('filterContainer');
 const fcGrid          = document.getElementById('fcGrid');
@@ -125,6 +135,140 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !hwModal.hidden) closeHwModal();
 });
 
+// ── BARALHOS ──────────────────────────────────────────────────
+function updateMarkerButtons() {
+  const { baralhos, activeId } = baralhoState;
+  const markedIds = activeId
+    ? new Set(baralhos.find(b => b.id === activeId)?.ids ?? [])
+    : new Set(baralhos.flatMap(b => b.ids));
+  fcGrid.querySelectorAll('.fc-marker-btn').forEach(btn => {
+    const marked = markedIds.has(btn.dataset.id);
+    btn.classList.toggle('marked', marked);
+    btn.textContent = marked ? '★' : '☆';
+  });
+}
+
+function renderBaralhoPanel() {
+  baralhoContainer.innerHTML = '';
+
+  const newBtn = document.createElement('button');
+  newBtn.className = 'baralho-new-btn';
+  newBtn.textContent = '+ Novo baralho';
+  newBtn.addEventListener('click', () => {
+    const nome = prompt('Nome do baralho:')?.trim();
+    if (!nome) return;
+    const b = criarBaralho(nome);
+    baralhoState.baralhos.push(b);
+    baralhoState.activeId = b.id;
+    saveBaralhos(baralhoState.baralhos);
+    renderBaralhoPanel();
+    updateMarkerButtons();
+  });
+  baralhoContainer.appendChild(newBtn);
+
+  for (const b of baralhoState.baralhos) {
+    const pill = document.createElement('div');
+    pill.className = 'baralho-pill' + (b.id === baralhoState.activeId ? ' active' : '');
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = b.nome;
+
+    const countSpan = document.createElement('span');
+    countSpan.className = 'baralho-pill-count';
+    countSpan.textContent = b.ids.length;
+
+    const actions = document.createElement('div');
+    actions.className = 'baralho-pill-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'baralho-pill-btn';
+    editBtn.title = 'Renomear';
+    editBtn.textContent = '✏';
+    editBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const nome = prompt('Novo nome:', b.nome)?.trim();
+      if (!nome) return;
+      b.nome = nome;
+      saveBaralhos(baralhoState.baralhos);
+      renderBaralhoPanel();
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'baralho-pill-btn';
+    delBtn.title = 'Deletar';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (!confirm(`Deletar baralho "${b.nome}"?`)) return;
+      baralhoState.baralhos = baralhoState.baralhos.filter(x => x.id !== b.id);
+      if (baralhoState.activeId === b.id) baralhoState.activeId = null;
+      saveBaralhos(baralhoState.baralhos);
+      renderBaralhoPanel();
+      updateMarkerButtons();
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    pill.appendChild(nameSpan);
+    pill.appendChild(countSpan);
+    pill.appendChild(actions);
+
+    pill.addEventListener('click', () => {
+      baralhoState.activeId = baralhoState.activeId === b.id ? null : b.id;
+      renderBaralhoPanel();
+      updateMarkerButtons();
+    });
+
+    baralhoContainer.appendChild(pill);
+  }
+}
+
+function showMarkerPopover(btn, itemId) {
+  document.querySelector('.baralho-popover')?.remove();
+
+  const pop = document.createElement('div');
+  pop.className = 'baralho-popover';
+
+  if (baralhoState.baralhos.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'baralho-popover-empty';
+    empty.textContent = 'Crie um baralho primeiro';
+    pop.appendChild(empty);
+  } else {
+    for (const b of baralhoState.baralhos) {
+      const label = document.createElement('label');
+      label.className = 'baralho-popover-item';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.deck = b.id;
+      cb.checked = b.ids.includes(itemId);
+      cb.addEventListener('change', () => {
+        toggleItem(b, itemId);
+        saveBaralhos(baralhoState.baralhos);
+        updateMarkerButtons();
+        renderBaralhoPanel();
+      });
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(b.nome));
+      pop.appendChild(label);
+    }
+  }
+
+  const rect = btn.getBoundingClientRect();
+  pop.style.top  = `${rect.bottom + 6 + window.scrollY}px`;
+  pop.style.left = `${Math.max(8, rect.right - 160 + window.scrollX)}px`;
+  document.body.appendChild(pop);
+
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!pop.contains(e.target)) {
+        pop.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 0);
+}
+
 // ── FILTER BUTTONS ────────────────────────────────────────────
 function renderFilters() {
   filterContainer.innerHTML = '';
@@ -155,6 +299,7 @@ function renderBatch() {
     fcGrid.appendChild(card);
   }
   state.renderedCount += slice.length;
+  updateMarkerButtons();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -263,6 +408,24 @@ mobileSearchBtn.addEventListener('click', openCmdk);
 
 // ── FLIP EVENTS ───────────────────────────────────────────────
 fcGrid.addEventListener('click', e => {
+  // marker button — toggle item in/out of baralho
+  const markerBtn = e.target.closest('.fc-marker-btn');
+  if (markerBtn) {
+    const itemId = markerBtn.dataset.id;
+    if (baralhoState.activeId) {
+      const b = baralhoState.baralhos.find(x => x.id === baralhoState.activeId);
+      if (b) {
+        toggleItem(b, itemId);
+        saveBaralhos(baralhoState.baralhos);
+        updateMarkerButtons();
+        renderBaralhoPanel();
+      }
+    } else {
+      showMarkerPopover(markerBtn, itemId);
+    }
+    return;
+  }
+
   // stroke button opens the modal without flipping the card
   const hwBtn = e.target.closest('.fc-hw-btn');
   if (hwBtn) {
@@ -450,9 +613,11 @@ document.addEventListener('keydown', e => {
 // ── INIT ─────────────────────────────────────────────────────
 function init() {
   renderFilters();
+  renderBaralhoPanel();
   renderGuide();
   state.filteredItems = computeFiltered();
   renderBatch();
+  updateMarkerButtons();
   updateProgress();
   activateObserver();
   renderCountries();

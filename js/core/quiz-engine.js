@@ -10,25 +10,27 @@ function shuffle(arr) {
   return a;
 }
 
-function activePool(selectedCategories) {
+function activePool(selectedCategories, itemIds) {
+  if (itemIds && itemIds.length > 0)
+    return hanziList.filter(h => itemIds.includes(h.id));
   return selectedCategories.length === 0
     ? [...hanziList]
     : hanziList.filter(h => selectedCategories.includes(h.category));
 }
 
-export function eligiblePool(mode, selectedCategories) {
-  const pool = activePool(selectedCategories);
+export function eligiblePool(mode, selectedCategories, itemIds) {
+  const pool = activePool(selectedCategories, itemIds);
   return mode === 'stroke-order'
     ? pool.filter(item => [...item.hanzi].length === 1)
     : pool;
 }
 
-export function poolSize(mode, selectedCategories) {
-  return eligiblePool(mode, selectedCategories).length;
+export function poolSize(mode, selectedCategories, itemIds) {
+  return eligiblePool(mode, selectedCategories, itemIds).length;
 }
 
-export function buildQuestions(mode, selectedCategories, count) {
-  let pool = shuffle(eligiblePool(mode, selectedCategories));
+export function buildQuestions(mode, selectedCategories, count, itemIds) {
+  let pool = shuffle(eligiblePool(mode, selectedCategories, itemIds));
   if (count !== 'all') pool = pool.slice(0, count);
 
   return pool.map(item => {
@@ -68,8 +70,8 @@ export function buildQuestions(mode, selectedCategories, count) {
   });
 }
 
-export function buildStrokeQuestions(selectedCategories, count) {
-  let pool = shuffle(eligiblePool('stroke-order', selectedCategories));
+export function buildStrokeQuestions(selectedCategories, count, itemIds) {
+  let pool = shuffle(eligiblePool('stroke-order', selectedCategories, itemIds));
   if (count !== 'all') pool = pool.slice(0, count);
   return pool;
 }
