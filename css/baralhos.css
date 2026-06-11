@@ -1,13 +1,300 @@
 /* ── PAINEL DE BARALHOS ──────────────────────────────────────── */
 .baralho-panel {
-  padding: 10px 0 2px;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 14px 0 18px;
   border-top: 1px solid rgba(0,0,0,0.07);
   margin-top: 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+
+.baralho-panel::-webkit-scrollbar { display: none; }
+
+/* ── MINI-CARD DE BARALHO ────────────────────────────────────── */
+.baralho-card {
+  flex-shrink: 0;
+  width: 120px;
+  height: 84px;
+  border-radius: 16px;
+  background: #EEECEA;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 10px 8px;
+  gap: 5px;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+  user-select: none;
+  text-align: center;
+}
+
+.baralho-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+  transform: translateY(-2px);
+}
+
+.baralho-card.active {
+  background: var(--text) !important;
+  border-color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  transform: translateY(-2px);
+}
+
+.baralho-card--empty { opacity: 0.5; }
+.baralho-card--empty:hover { transform: none; box-shadow: none; }
+
+/* paleta cíclica — tons pastel alinhados com os flash cards */
+.baralho-card--c0 { background: #E8F7E9; } /* verde  */
+.baralho-card--c1 { background: #E0EEFF; } /* azul   */
+.baralho-card--c2 { background: #FFF5D8; } /* âmbar  */
+.baralho-card--c3 { background: #F0E8FF; } /* lilás  */
+.baralho-card--c4 { background: #FFE8E8; } /* rosa   */
+
+.baralho-card-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 13px;
+  line-height: 1.25;
+  color: var(--text);
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+.baralho-card.active .baralho-card-name { color: #fff; }
+
+.baralho-card-count {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+
+.baralho-card.active .baralho-card-count { color: rgba(255,255,255,0.6); }
+
+.baralho-card-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: none;
+  gap: 1px;
+}
+
+.baralho-card:hover .baralho-card-actions { display: flex; }
+
+.baralho-card-btn {
+  background: rgba(255,255,255,0.75);
+  border: none;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.baralho-card.active .baralho-card-btn { background: rgba(255,255,255,0.2); color: #fff; }
+.baralho-card-btn:hover { opacity: 1; background: rgba(255,255,255,0.95); }
+.baralho-card-btn--del:hover { color: #C04040; }
+
+/* ── BOTÃO "NOVO BARALHO" ────────────────────────────────────── */
+.baralho-new-card {
+  flex-shrink: 0;
+  width: 120px;
+  height: 84px;
+  border-radius: 16px;
+  border: 1.5px dashed rgba(0,0,0,0.18);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--subtle);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.baralho-new-card:hover {
+  border-color: var(--text);
+  color: var(--text);
+  background: rgba(0,0,0,0.02);
+  transform: translateY(-2px);
+}
+
+.baralho-new-card-plus {
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  font-family: 'DM Serif Display', serif;
+}
+
+/* ── MARCADOR NOS CARDS ──────────────────────────────────────── */
+.fc-marker-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 3px 5px;
+  color: rgba(0,0,0,0.2);
+  transition: color 0.15s, transform 0.15s;
+  border-radius: 6px;
+}
+
+.fc-marker-btn:hover {
+  color: rgba(0,0,0,0.55);
+  transform: scale(1.2);
+}
+
+.fc-marker-btn.marked { color: #C04040; }
+
+.fc-marker-btn.pulse { animation: markerPulse 0.4s ease; }
+
+@keyframes markerPulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+/* ── POPOVER: ação de criar ──────────────────────────────────── */
+.baralho-popover-create {
+  display: block;
+  width: calc(100% - 12px);
+  margin: 4px 6px 2px;
+  padding: 7px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  text-align: left;
+  border: 1px dashed rgba(0,0,0,0.22);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.1s;
+}
+
+.baralho-popover-create:hover { border-color: var(--text); background: rgba(0,0,0,0.03); }
+
+/* ── POPOVER ─────────────────────────────────────────────────── */
+.baralho-popover {
+  position: fixed;
+  z-index: 2000;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  padding: 6px 0;
+  min-width: 150px;
+  max-width: 220px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+.baralho-popover-empty {
+  padding: 8px 14px;
+  color: var(--subtle);
+  font-size: 12px;
+}
+
+.baralho-popover-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.1s;
+}
+
+.baralho-popover-item:hover { background: rgba(0,0,0,0.04); }
+
+.baralho-popover-item input[type="checkbox"] {
+  accent-color: var(--text);
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ── QUIZ — SELEÇÃO DE BARALHO ───────────────────────────────── */
+.quiz-deck-row {
+  border-top: 1px solid rgba(0,0,0,0.07);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.quiz-deck-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quiz-deck-pill {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  background: transparent;
+  color: var(--subtle);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.quiz-deck-pill:hover { border-color: #8A7868; color: var(--text); }
+
+.quiz-deck-pill.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: white;
+}
+
+.quiz-deck-pill-count {
+  font-size: 10px;
+  opacity: 0.65;
+}
+
+.quiz-deck-pill--dim {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* linha de categoria ignorada quando há baralho ativo */
+.quiz-settings-row--ignored {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.quiz-settings-ignored-note {
+  font-size: 10px;
+  color: var(--subtle);
+  font-style: italic;
+  margin-left: 6px;
+}
+
 
 .baralho-new-btn {
   font-family: 'DM Sans', sans-serif;

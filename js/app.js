@@ -212,10 +212,11 @@ function renderBaralhoPanel() {
 
   baralhoContainer.innerHTML = '';
 
-  const newBtn = document.createElement('button');
-  newBtn.className = 'baralho-new-btn';
-  newBtn.textContent = '+ Novo baralho';
-  newBtn.addEventListener('click', () => {
+  // botão "Novo baralho" — mesmo tamanho dos mini-cards
+  const newCard = document.createElement('button');
+  newCard.className = 'baralho-new-card';
+  newCard.innerHTML = `<span class="baralho-new-card-plus">+</span><span>Novo baralho</span>`;
+  newCard.addEventListener('click', () => {
     openBaralhoModal({
       title: 'Novo baralho',
       confirmLabel: 'Criar',
@@ -227,27 +228,31 @@ function renderBaralhoPanel() {
       },
     });
   });
-  baralhoContainer.appendChild(newBtn);
+  baralhoContainer.appendChild(newCard);
 
-  for (const b of baralhos) {
-    const pill = document.createElement('div');
-    pill.className = 'baralho-pill'
-      + (b.id === activeDeckId ? ' active' : '')
-      + (b.ids.length === 0 ? ' baralho-pill--empty' : '');
-    if (b.ids.length === 0) pill.title = 'Baralho vazio — marque cards com ☆';
+  baralhos.forEach((b, i) => {
+    const card = document.createElement('div');
+    card.className = [
+      'baralho-card',
+      `baralho-card--c${i % 5}`,
+      b.id === activeDeckId ? 'active' : '',
+      b.ids.length === 0 ? 'baralho-card--empty' : '',
+    ].filter(Boolean).join(' ');
+    if (b.ids.length === 0) card.title = 'Baralho vazio — marque cards com ☆';
 
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = b.nome;
+    const nameEl = document.createElement('div');
+    nameEl.className = 'baralho-card-name';
+    nameEl.textContent = b.nome;
 
-    const countSpan = document.createElement('span');
-    countSpan.className = 'baralho-pill-count';
-    countSpan.textContent = b.ids.length;
+    const countEl = document.createElement('div');
+    countEl.className = 'baralho-card-count';
+    countEl.textContent = `${b.ids.length} ${b.ids.length === 1 ? 'card' : 'cards'}`;
 
     const actions = document.createElement('div');
-    actions.className = 'baralho-pill-actions';
+    actions.className = 'baralho-card-actions';
 
     const editBtn = document.createElement('button');
-    editBtn.className = 'baralho-pill-btn';
+    editBtn.className = 'baralho-card-btn';
     editBtn.title = 'Renomear';
     editBtn.textContent = '✏';
     editBtn.addEventListener('click', e => {
@@ -260,7 +265,7 @@ function renderBaralhoPanel() {
     });
 
     const delBtn = document.createElement('button');
-    delBtn.className = 'baralho-pill-btn';
+    delBtn.className = 'baralho-card-btn baralho-card-btn--del';
     delBtn.title = 'Deletar';
     delBtn.textContent = '✕';
     delBtn.addEventListener('click', e => {
@@ -280,18 +285,18 @@ function renderBaralhoPanel() {
 
     actions.appendChild(editBtn);
     actions.appendChild(delBtn);
-    pill.appendChild(nameSpan);
-    pill.appendChild(countSpan);
-    pill.appendChild(actions);
+    card.appendChild(nameEl);
+    card.appendChild(countEl);
+    card.appendChild(actions);
 
-    pill.addEventListener('click', () => {
+    card.addEventListener('click', () => {
       activeDeckId = activeDeckId === b.id ? null : b.id;
       renderBaralhoPanel();
       updateMarkerButtons();
     });
 
-    baralhoContainer.appendChild(pill);
-  }
+    baralhoContainer.appendChild(card);
+  });
 }
 
 function showMarkerPopover(btn, itemId) {
