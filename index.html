@@ -84,6 +84,21 @@
   </div>
 </div>
 
+<div class="baralho-modal" id="baralhoModal" hidden>
+  <div class="baralho-modal-backdrop" data-bm-close></div>
+  <div class="baralho-modal-card" role="dialog" aria-modal="true" aria-labelledby="bmTitle">
+    <h3 class="baralho-modal-title" id="bmTitle"></h3>
+    <p class="baralho-modal-text" id="bmText" hidden></p>
+    <input class="baralho-modal-input" id="bmInput" type="text" maxlength="40"
+           placeholder="Ex: Verbos difíceis" autocomplete="off">
+    <p class="baralho-modal-msg" id="bmMsg"></p>
+    <div class="baralho-modal-actions">
+      <button class="baralho-modal-btn baralho-modal-btn--ghost" data-bm-close type="button">Cancelar</button>
+      <button class="baralho-modal-btn baralho-modal-btn--primary" id="bmConfirm" type="button">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="hw-modal" id="hwModal" hidden>
   <div class="hw-modal-backdrop" data-hw-close></div>
   <div class="hw-modal-card" role="dialog" aria-modal="true" aria-labelledby="hwModalHanzi">

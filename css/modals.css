@@ -139,6 +139,119 @@ body.hw-modal-open { overflow: hidden; }
   .hw-modal-canvas { width: 260px; height: 260px; }
 }
 
+/* ── MODAL DE BARALHO (nome / confirmação) ────────────────── */
+body.baralho-modal-open { overflow: hidden; }
+
+.baralho-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.baralho-modal[hidden] { display: none; }
+
+.baralho-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 28, 26, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.baralho-modal-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 360px;
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 26px 24px 22px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24);
+  animation: fadeUp 0.25s ease;
+}
+
+.baralho-modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.baralho-modal-text {
+  font-size: 14px;
+  color: var(--subtle);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.baralho-modal-text[hidden] { display: none; }
+
+.baralho-modal-input {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  padding: 11px 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.baralho-modal-input:focus { border-color: var(--text); }
+.baralho-modal-input[hidden] { display: none; }
+
+.baralho-modal-msg {
+  min-height: 16px;
+  font-size: 12px;
+  color: #C04040;
+  margin-top: 7px;
+}
+
+.baralho-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.baralho-modal-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.baralho-modal-btn:hover { background: #fff; border-color: var(--text); }
+.baralho-modal-btn:active { transform: scale(0.96); }
+
+.baralho-modal-btn--primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: #fff;
+}
+
+.baralho-modal-btn--primary:hover { background: #000; }
+
+.baralho-modal-btn--danger {
+  background: #C04040;
+  border-color: #C04040;
+  color: #fff;
+}
+
+.baralho-modal-btn--danger:hover { background: #A83232; border-color: #A83232; }
+
 /* ── COMMAND PALETTE (global search) ──────────────────────── */
 body.cmdk-open { overflow: hidden; }
 

@@ -1,10 +1,11 @@
 import { categories, hanziList } from './data/catalog.js';
 import { state, COUNT_OPTIONS, COUNT_LABELS } from './core/quiz-state.js';
 import { poolSize, buildQuestions, buildStrokeQuestions } from './core/quiz-engine.js';
-import { loadQuizSettings, saveQuizSettings, loadBaralhos } from './services/storage.js';
+import { loadQuizSettings, saveQuizSettings } from './services/storage.js';
 import { createStrokeWriter, animateWriter, startWriterQuiz } from './services/hanzi-writer.js';
 import { createFlipCard } from './core/flip-card.js';
 import { shortTranslation } from './core/vocabulary.js';
+import * as baralhosStore from './services/baralhos-store.js';
 
 const container = document.getElementById('quizContainer');
 
@@ -21,17 +22,15 @@ function loadSettings() {
     state.categories = saved.categories.filter(id => validCatIds.has(id) && id !== 'all');
   if (saved.count === 'all' || COUNT_OPTIONS.includes(saved.count))
     state.count = saved.count;
-  if (saved.deckId) {
-    const baralhos = loadBaralhos();
-    if (baralhos.find(b => b.id === saved.deckId)) state.deckId = saved.deckId;
-  }
+  if (saved.deckId && baralhosStore.getBaralho(saved.deckId)) state.deckId = saved.deckId;
 }
 
-// IDs do baralho ativo, ou null se nenhum selecionado
+// IDs do baralho ativo, ou null se nenhum selecionado / baralho inexistente
 function deckItemIds() {
   if (!state.deckId) return null;
-  const b = loadBaralhos().find(b => b.id === state.deckId);
-  return b ? b.ids : [];
+  const ids = baralhosStore.deckIds(state.deckId);
+  if (ids === null) { state.deckId = null; saveSettings(); } // baralho foi removido
+  return ids;
 }
 
 // ── SELECTOR HELPERS ──────────────────────────────────────────────
@@ -76,6 +75,50 @@ function updateCatPills() {
   });
 }
 
+// linha de baralhos: re-renderizável e reativa ao store (criar/deletar nos cards reflete aqui)
+function renderDeckRow() {
+  const row = container.querySelector('#quizDeckRow');
+  if (!row) return;
+  const baralhos = baralhosStore.getBaralhos();
+
+  if (state.deckId && !baralhosStore.getBaralho(state.deckId)) state.deckId = null;
+
+  if (!baralhos.length) {
+    row.hidden = true;
+    row.innerHTML = '';
+    updateCategoryIgnored();
+    return;
+  }
+
+  row.hidden = false;
+  row.innerHTML = `
+    <span class="quiz-settings-label">Baralho</span>
+    <div class="quiz-deck-pills">
+      <button class="quiz-deck-pill${!state.deckId ? ' active' : ''}" data-deck="">Nenhum</button>
+      ${baralhos.map(b => `<button class="quiz-deck-pill${state.deckId === b.id ? ' active' : ''}${b.ids.length === 0 ? ' quiz-deck-pill--dim' : ''}" data-deck="${b.id}">${b.nome} <span class="quiz-deck-pill-count">${b.ids.length}</span></button>`).join('')}
+    </div>`;
+
+  row.querySelectorAll('.quiz-deck-pill').forEach(btn =>
+    btn.addEventListener('click', () => {
+      state.deckId = btn.dataset.deck || null;
+      renderDeckRow();
+      updateCountButtons();
+      saveSettings();
+    })
+  );
+
+  updateCategoryIgnored();
+}
+
+function updateCategoryIgnored() {
+  const catRow = container.querySelector('#quizCatRow');
+  const note   = container.querySelector('#quizCatNote');
+  if (!catRow) return;
+  const ignored = !!state.deckId;
+  catRow.classList.toggle('quiz-settings-row--ignored', ignored);
+  if (note) note.hidden = !ignored;
+}
+
 // ── MODE SELECTOR ─────────────────────────────────────────────────
 function renderModeSelector() {
   const catItemCount = Object.fromEntries(
@@ -89,24 +132,14 @@ function renderModeSelector() {
       <p class="quiz-mode-error" id="quizModeError" hidden></p>
 
       <div class="quiz-settings">
-        <div class="quiz-settings-row quiz-settings-row--top">
-          <span class="quiz-settings-label">Categoria</span>
+        <div class="quiz-settings-row quiz-settings-row--top" id="quizCatRow">
+          <span class="quiz-settings-label">Categoria<span class="quiz-settings-ignored-note" id="quizCatNote" hidden> (ignorado com baralho)</span></span>
           <div class="quiz-cat-pills">
             <button class="quiz-cat-pill${state.categories.length === 0 ? ' active' : ''}" data-cat="all">Todos</button>
             ${specificCats.map(c => `<button class="quiz-cat-pill${state.categories.includes(c.id) ? ' active' : ''}" data-cat="${c.id}">${c.label} <span class="quiz-cat-pill-count">${catItemCount[c.id]}</span></button>`).join('')}
           </div>
         </div>
-        ${(() => {
-          const baralhos = loadBaralhos();
-          if (!baralhos.length) return '';
-          return `<div class="quiz-settings-row quiz-deck-row">
-          <span class="quiz-settings-label">Baralho</span>
-          <div class="quiz-deck-pills">
-            <button class="quiz-deck-pill${!state.deckId ? ' active' : ''}" data-deck="">Nenhum</button>
-            ${baralhos.map(b => `<button class="quiz-deck-pill${state.deckId === b.id ? ' active' : ''}" data-deck="${b.id}">${b.nome} <span class="quiz-deck-pill-count">${b.ids.length}</span></button>`).join('')}
-          </div>
-        </div>`;
-        })()}
+        <div class="quiz-settings-row quiz-deck-row" id="quizDeckRow" hidden></div>
         <div class="quiz-settings-row">
           <span class="quiz-settings-label">Perguntas</span>
           <div class="quiz-count-group">
@@ -165,16 +198,7 @@ function renderModeSelector() {
     })
   );
 
-  container.querySelectorAll('.quiz-deck-pill').forEach(btn =>
-    btn.addEventListener('click', () => {
-      state.deckId = btn.dataset.deck || null;
-      container.querySelectorAll('.quiz-deck-pill').forEach(b =>
-        b.classList.toggle('active', b.dataset.deck === (state.deckId ?? ''))
-      );
-      updateCountButtons();
-      saveSettings();
-    })
-  );
+  renderDeckRow();
 
   container.querySelectorAll('.quiz-count-btn').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -205,7 +229,9 @@ function startQuiz(mode) {
     state.mode = null;
     renderModeSelector();
     const error = document.getElementById('quizModeError');
-    error.textContent = 'Nenhum item disponível para este modo com as categorias selecionadas.';
+    error.textContent = state.deckId
+      ? 'Este baralho não tem itens compatíveis com este modo.'
+      : 'Nenhum item disponível para este modo com as categorias selecionadas.';
     error.hidden = false;
     return;
   }
@@ -458,3 +484,12 @@ function renderResult(answeredTotal = state.questions.length) {
 // ── INIT ──────────────────────────────────────────────────────────
 loadSettings();
 renderModeSelector();
+
+// reflete criação/edição/remoção de baralhos feita na aba de cards,
+// mas apenas quando o seletor de modo está montado (não durante um quiz ativo)
+baralhosStore.subscribe(() => {
+  if (state.mode === null && container.querySelector('#quizDeckRow')) {
+    renderDeckRow();
+    updateCountButtons();
+  }
+});

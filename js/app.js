@@ -15,8 +15,7 @@ import { search } from './core/search.js';
 import { HSK_FILTER_OPTIONS } from './core/hsk.js';
 import { hskColor } from './core/hsk-colors.js';
 import { primaryTranslation } from './core/vocabulary.js';
-import { loadBaralhos, saveBaralhos } from './services/storage.js';
-import { criarBaralho, toggleItem, validarIds } from './core/baralhos.js';
+import * as baralhosStore from './services/baralhos-store.js';
 
 const state = {
   activeFilter: 'all',
@@ -28,12 +27,8 @@ const state = {
   observer: null,
 };
 
-const validIds = new Set(hanziList.map(h => h.id));
-
-const baralhoState = {
-  baralhos: loadBaralhos().map(b => { validarIds(b, validIds); return b; }),
-  activeId: null,
-};
+// qual baralho está em foco para marcar itens (UI local; o estado dos baralhos vive no store)
+let activeDeckId = null;
 
 // category id → category object, for headers
 const categoryById = new Map(categories.map(c => [c.id, c]));
@@ -135,40 +130,111 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !hwModal.hidden) closeHwModal();
 });
 
+// ── MODAL DE BARALHO (nome / confirmação) ─────────────────────
+const baralhoModal   = document.getElementById('baralhoModal');
+const bmTitle        = document.getElementById('bmTitle');
+const bmText         = document.getElementById('bmText');
+const bmInput        = document.getElementById('bmInput');
+const bmMsg          = document.getElementById('bmMsg');
+const bmConfirm      = document.getElementById('bmConfirm');
+
+let bmOnConfirm = null;
+
+function openBaralhoModal({ title, initialValue = '', confirmLabel = 'Salvar', withInput = true, message = '', danger = false, onConfirm }) {
+  bmTitle.textContent = title;
+  bmConfirm.textContent = confirmLabel;
+  bmConfirm.classList.toggle('baralho-modal-btn--danger', danger);
+  bmConfirm.classList.toggle('baralho-modal-btn--primary', !danger);
+  bmMsg.textContent = '';
+  bmOnConfirm = onConfirm;
+
+  bmText.hidden = !message;
+  bmText.textContent = message;
+
+  bmInput.hidden = !withInput;
+  if (withInput) bmInput.value = initialValue;
+
+  baralhoModal.hidden = false;
+  document.body.classList.add('baralho-modal-open');
+  if (withInput) requestAnimationFrame(() => { bmInput.focus(); bmInput.select(); });
+  else requestAnimationFrame(() => bmConfirm.focus());
+}
+
+function closeBaralhoModal() {
+  baralhoModal.hidden = true;
+  document.body.classList.remove('baralho-modal-open');
+  bmOnConfirm = null;
+}
+
+function confirmBaralhoModal() {
+  if (!bmOnConfirm) return;
+  if (!bmInput.hidden) {
+    const nome = bmInput.value.trim();
+    if (!nome) { bmMsg.textContent = 'Digite um nome.'; return; }
+    bmOnConfirm(nome);
+  } else {
+    bmOnConfirm();
+  }
+  closeBaralhoModal();
+}
+
+bmConfirm.addEventListener('click', confirmBaralhoModal);
+baralhoModal.addEventListener('click', e => {
+  if (e.target.closest('[data-bm-close]')) closeBaralhoModal();
+});
+bmInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); confirmBaralhoModal(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !baralhoModal.hidden) closeBaralhoModal();
+});
+
 // ── BARALHOS ──────────────────────────────────────────────────
-function updateMarkerButtons() {
-  const { baralhos, activeId } = baralhoState;
-  const markedIds = activeId
-    ? new Set(baralhos.find(b => b.id === activeId)?.ids ?? [])
-    : new Set(baralhos.flatMap(b => b.ids));
+function updateMarkerButtons(bumpId = null) {
+  const markedIds = activeDeckId
+    ? new Set(baralhosStore.getBaralho(activeDeckId)?.ids ?? [])
+    : new Set(baralhosStore.getBaralhos().flatMap(b => b.ids));
   fcGrid.querySelectorAll('.fc-marker-btn').forEach(btn => {
     const marked = markedIds.has(btn.dataset.id);
     btn.classList.toggle('marked', marked);
     btn.textContent = marked ? '★' : '☆';
+    if (btn.dataset.id === bumpId) {
+      btn.classList.remove('pulse');
+      void btn.offsetWidth; // reinicia a animação
+      btn.classList.add('pulse');
+    }
   });
 }
 
 function renderBaralhoPanel() {
+  const baralhos = baralhosStore.getBaralhos();
+  if (activeDeckId && !baralhosStore.getBaralho(activeDeckId)) activeDeckId = null;
+
   baralhoContainer.innerHTML = '';
 
   const newBtn = document.createElement('button');
   newBtn.className = 'baralho-new-btn';
   newBtn.textContent = '+ Novo baralho';
   newBtn.addEventListener('click', () => {
-    const nome = prompt('Nome do baralho:')?.trim();
-    if (!nome) return;
-    const b = criarBaralho(nome);
-    baralhoState.baralhos.push(b);
-    baralhoState.activeId = b.id;
-    saveBaralhos(baralhoState.baralhos);
-    renderBaralhoPanel();
-    updateMarkerButtons();
+    openBaralhoModal({
+      title: 'Novo baralho',
+      confirmLabel: 'Criar',
+      onConfirm: nome => {
+        const b = baralhosStore.addBaralho(nome);
+        activeDeckId = b.id;
+        renderBaralhoPanel();
+        updateMarkerButtons();
+      },
+    });
   });
   baralhoContainer.appendChild(newBtn);
 
-  for (const b of baralhoState.baralhos) {
+  for (const b of baralhos) {
     const pill = document.createElement('div');
-    pill.className = 'baralho-pill' + (b.id === baralhoState.activeId ? ' active' : '');
+    pill.className = 'baralho-pill'
+      + (b.id === activeDeckId ? ' active' : '')
+      + (b.ids.length === 0 ? ' baralho-pill--empty' : '');
+    if (b.ids.length === 0) pill.title = 'Baralho vazio — marque cards com ☆';
 
     const nameSpan = document.createElement('span');
     nameSpan.textContent = b.nome;
@@ -186,11 +252,11 @@ function renderBaralhoPanel() {
     editBtn.textContent = '✏';
     editBtn.addEventListener('click', e => {
       e.stopPropagation();
-      const nome = prompt('Novo nome:', b.nome)?.trim();
-      if (!nome) return;
-      b.nome = nome;
-      saveBaralhos(baralhoState.baralhos);
-      renderBaralhoPanel();
+      openBaralhoModal({
+        title: 'Renomear baralho',
+        initialValue: b.nome,
+        onConfirm: nome => baralhosStore.renameBaralho(b.id, nome),
+      });
     });
 
     const delBtn = document.createElement('button');
@@ -199,12 +265,17 @@ function renderBaralhoPanel() {
     delBtn.textContent = '✕';
     delBtn.addEventListener('click', e => {
       e.stopPropagation();
-      if (!confirm(`Deletar baralho "${b.nome}"?`)) return;
-      baralhoState.baralhos = baralhoState.baralhos.filter(x => x.id !== b.id);
-      if (baralhoState.activeId === b.id) baralhoState.activeId = null;
-      saveBaralhos(baralhoState.baralhos);
-      renderBaralhoPanel();
-      updateMarkerButtons();
+      openBaralhoModal({
+        title: 'Deletar baralho',
+        message: `Deletar o baralho "${b.nome}"? Esta ação não pode ser desfeita.`,
+        withInput: false,
+        confirmLabel: 'Deletar',
+        danger: true,
+        onConfirm: () => {
+          if (activeDeckId === b.id) activeDeckId = null;
+          baralhosStore.deleteBaralho(b.id);
+        },
+      });
     });
 
     actions.appendChild(editBtn);
@@ -214,7 +285,7 @@ function renderBaralhoPanel() {
     pill.appendChild(actions);
 
     pill.addEventListener('click', () => {
-      baralhoState.activeId = baralhoState.activeId === b.id ? null : b.id;
+      activeDeckId = activeDeckId === b.id ? null : b.id;
       renderBaralhoPanel();
       updateMarkerButtons();
     });
@@ -229,13 +300,33 @@ function showMarkerPopover(btn, itemId) {
   const pop = document.createElement('div');
   pop.className = 'baralho-popover';
 
-  if (baralhoState.baralhos.length === 0) {
+  const baralhos = baralhosStore.getBaralhos();
+  if (baralhos.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'baralho-popover-empty';
-    empty.textContent = 'Crie um baralho primeiro';
+    empty.textContent = 'Nenhum baralho ainda';
     pop.appendChild(empty);
+
+    const create = document.createElement('button');
+    create.className = 'baralho-popover-create';
+    create.textContent = '+ Criar baralho';
+    create.addEventListener('click', () => {
+      pop.remove();
+      openBaralhoModal({
+        title: 'Novo baralho',
+        confirmLabel: 'Criar',
+        onConfirm: nome => {
+          const b = baralhosStore.addBaralho(nome);
+          activeDeckId = b.id;
+          baralhosStore.toggleItem(b.id, itemId);
+          renderBaralhoPanel();
+          updateMarkerButtons(itemId);
+        },
+      });
+    });
+    pop.appendChild(create);
   } else {
-    for (const b of baralhoState.baralhos) {
+    for (const b of baralhos) {
       const label = document.createElement('label');
       label.className = 'baralho-popover-item';
       const cb = document.createElement('input');
@@ -243,10 +334,8 @@ function showMarkerPopover(btn, itemId) {
       cb.dataset.deck = b.id;
       cb.checked = b.ids.includes(itemId);
       cb.addEventListener('change', () => {
-        toggleItem(b, itemId);
-        saveBaralhos(baralhoState.baralhos);
-        updateMarkerButtons();
-        renderBaralhoPanel();
+        baralhosStore.toggleItem(b.id, itemId);
+        updateMarkerButtons(itemId);
       });
       label.appendChild(cb);
       label.appendChild(document.createTextNode(b.nome));
@@ -268,6 +357,12 @@ function showMarkerPopover(btn, itemId) {
     });
   }, 0);
 }
+
+// painel reage a qualquer mudança no store (inclui ações vindas do quiz)
+baralhosStore.subscribe(() => {
+  renderBaralhoPanel();
+  updateMarkerButtons();
+});
 
 // ── FILTER BUTTONS ────────────────────────────────────────────
 function renderFilters() {
@@ -412,14 +507,9 @@ fcGrid.addEventListener('click', e => {
   const markerBtn = e.target.closest('.fc-marker-btn');
   if (markerBtn) {
     const itemId = markerBtn.dataset.id;
-    if (baralhoState.activeId) {
-      const b = baralhoState.baralhos.find(x => x.id === baralhoState.activeId);
-      if (b) {
-        toggleItem(b, itemId);
-        saveBaralhos(baralhoState.baralhos);
-        updateMarkerButtons();
-        renderBaralhoPanel();
-      }
+    if (activeDeckId) {
+      baralhosStore.toggleItem(activeDeckId, itemId);
+      updateMarkerButtons(itemId);
     } else {
       showMarkerPopover(markerBtn, itemId);
     }

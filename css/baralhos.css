@@ -57,6 +57,8 @@
   opacity: 0.65;
 }
 
+.baralho-pill--empty { opacity: 0.5; }
+
 .baralho-pill-actions {
   display: inline-flex;
   align-items: center;
@@ -101,6 +103,33 @@
 }
 
 .fc-marker-btn.marked { color: #C04040; }
+
+.fc-marker-btn.pulse { animation: markerPulse 0.4s ease; }
+
+@keyframes markerPulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+/* ── POPOVER: ação de criar ──────────────────────────────────── */
+.baralho-popover-create {
+  display: block;
+  width: calc(100% - 12px);
+  margin: 4px 6px 2px;
+  padding: 7px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  text-align: left;
+  border: 1px dashed rgba(0,0,0,0.22);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.1s;
+}
+
+.baralho-popover-create:hover { border-color: var(--text); background: rgba(0,0,0,0.03); }
 
 /* ── POPOVER ─────────────────────────────────────────────────── */
 .baralho-popover {
@@ -182,4 +211,23 @@
 .quiz-deck-pill-count {
   font-size: 10px;
   opacity: 0.65;
+}
+
+.quiz-deck-pill--dim {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* linha de categoria ignorada quando há baralho ativo */
+.quiz-settings-row--ignored {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.quiz-settings-ignored-note {
+  font-size: 10px;
+  color: var(--subtle);
+  font-style: italic;
+  margin-left: 6px;
 }
