@@ -231,10 +231,13 @@ function renderBaralhoPanel() {
   baralhoContainer.appendChild(newCard);
 
   baralhos.forEach((b, i) => {
-    const card = document.createElement('div');
+    // cor derivada do ID (estável mesmo após deletar outros baralhos)
+    const colorIdx = Number(b.id.replace('b-', '')) % 5;
+    const card = document.createElement('button');
+    card.type = 'button';
     card.className = [
       'baralho-card',
-      `baralho-card--c${i % 5}`,
+      `baralho-card--c${colorIdx}`,
       b.id === activeDeckId ? 'active' : '',
       b.ids.length === 0 ? 'baralho-card--empty' : '',
     ].filter(Boolean).join(' ');
