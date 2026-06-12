@@ -21,7 +21,7 @@
 
 <header class="hero">
   <h1>Hanzis<br><em>Essenciais</em></h1>
-  <p>72 caracteres · Guia de estudo + Flash Cards interativos</p>
+  <p id="heroSubtitle">72 caracteres · Guia de estudo + Flash Cards interativos</p>
 </header>
 
 <div class="tabs" id="tabsContainer">
@@ -29,10 +29,33 @@
   <button class="tab-btn" data-tab="guia">Guia de Estudo</button>
   <button class="tab-btn" data-tab="quiz">Quiz</button>
   <button class="tab-btn" data-tab="paises">Países</button>
-  <button class="tab-auth-btn" id="authBtn" aria-label="Entrar">
-    <i data-lucide="user"></i>
-    <span class="tab-auth-label" id="authLabel">Entrar</span>
-  </button>
+  <div class="tab-auth-wrap" id="authWrap">
+    <!-- estado deslogado -->
+    <button class="tab-auth-btn" id="authBtn" aria-label="Entrar">
+      <i data-lucide="user"></i>
+      <span class="tab-auth-label">Entrar</span>
+    </button>
+    <!-- estado logado: avatar + dropdown -->
+    <div class="user-avatar-wrap" id="userAvatarWrap" hidden>
+      <button class="user-avatar-btn" id="userAvatarBtn" type="button" aria-haspopup="true" aria-expanded="false">
+        <img class="user-avatar-img" id="userAvatarImg" alt="" hidden>
+        <span class="user-avatar-initials" id="userAvatarInitials"></span>
+      </button>
+      <div class="user-dropdown" id="userDropdown" hidden>
+        <div class="user-dropdown-header">
+          <p class="user-dropdown-name" id="userDropdownName"></p>
+          <p class="user-dropdown-email" id="userDropdownEmail"></p>
+        </div>
+        <div class="user-dropdown-divider"></div>
+        <button class="user-dropdown-item" id="userProfileBtn" type="button">
+          <i data-lucide="settings"></i>Perfil e configurações
+        </button>
+        <button class="user-dropdown-item user-dropdown-item--danger" id="userSignOutBtn" type="button">
+          <i data-lucide="log-out"></i>Sair
+        </button>
+      </div>
+    </div>
+  </div>
   <button class="tab-search-btn" id="globalSearchBtn" aria-label="Buscar">
     <i data-lucide="search"></i>
     <span class="tab-search-hint">Ctrl K</span>
@@ -158,10 +181,29 @@
       <button class="auth-link" id="authResend" type="button">Reenviar e-mail</button>
     </div>
 
-    <div class="auth-logged" id="authLogged" hidden>
-      <p class="auth-logged-name" id="authLoggedName"></p>
-      <p class="auth-logged-email" id="authLoggedEmail"></p>
-      <button class="auth-submit auth-submit--outline" id="authSignOut" type="button">Sair</button>
+    <!-- painel de perfil (visível quando logado e modal aberto via "Perfil") -->
+    <div class="auth-profile" id="authProfile" hidden>
+      <div class="auth-profile-hero">
+        <div class="auth-profile-avatar" id="authProfileAvatar"></div>
+        <p class="auth-profile-name" id="authProfileName"></p>
+        <p class="auth-profile-email" id="authProfileEmail"></p>
+      </div>
+      <div class="auth-profile-stats" id="authProfileStats"></div>
+      <div class="auth-profile-section">
+        <p class="auth-profile-section-title">Editar nome</p>
+        <div class="auth-input-wrap" style="margin-top:6px">
+          <input class="auth-input" id="profileNomeInput" type="text" maxlength="60"
+                 placeholder="Seu nome">
+        </div>
+        <button class="auth-submit" id="profileSaveBtn" type="button"
+                style="margin-top:10px">Salvar nome</button>
+        <p class="auth-msg" id="profileMsg"></p>
+      </div>
+      <div class="auth-profile-section">
+        <button class="auth-submit auth-submit--outline" id="profileSignOutBtn" type="button">
+          Sair da conta
+        </button>
+      </div>
     </div>
   </div>
 </div>

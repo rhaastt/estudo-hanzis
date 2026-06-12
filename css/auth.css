@@ -1,3 +1,206 @@
+/* ── WRAPPER ─────────────────────────────────────────────── */
+.tab-auth-wrap { position: relative; display: flex; align-items: center; }
+
+/* ── AVATAR BUTTON ───────────────────────────────────────── */
+.user-avatar-wrap { position: relative; }
+.user-avatar-wrap[hidden] { display: none; }
+
+.user-avatar-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.12);
+  background: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.user-avatar-btn:hover { border-color: var(--text); box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-avatar-img[hidden] { display: none; }
+
+.user-avatar-initials {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* ── DROPDOWN ────────────────────────────────────────────── */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 210px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  z-index: 400;
+  overflow: hidden;
+  animation: fadeUp 0.18s ease;
+}
+
+.user-dropdown[hidden] { display: none; }
+
+.user-dropdown-header {
+  padding: 14px 16px 12px;
+}
+
+.user-dropdown-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.user-dropdown-email {
+  font-size: 12px;
+  color: var(--subtle);
+  word-break: break-all;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.07);
+  margin: 0;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.user-dropdown-item:hover { background: var(--bg); }
+.user-dropdown-item i { width: 16px; height: 16px; color: var(--subtle); flex-shrink: 0; }
+.user-dropdown-item--danger { color: #C04040; }
+.user-dropdown-item--danger i { color: #C04040; }
+.user-dropdown-item--danger:hover { background: #FFF0F0; }
+
+/* ── PAINEL DE PERFIL (dentro do modal) ──────────────────── */
+.auth-profile { display: flex; flex-direction: column; gap: 20px; }
+.auth-profile[hidden] { display: none; }
+
+.auth-profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+.auth-profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.auth-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.auth-profile-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--text);
+  text-align: center;
+}
+
+.auth-profile-email {
+  font-size: 13px;
+  color: var(--subtle);
+  text-align: center;
+}
+
+/* estatísticas */
+.auth-profile-stats {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.auth-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px 8px;
+}
+
+.auth-stat-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.auth-stat-label {
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  text-align: center;
+}
+
+.auth-profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.auth-profile-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  margin-bottom: 0;
+}
+
 /* ── BOTÃO DE AUTH NA BARRA DE TABS ──────────────────────── */
 .tab-auth-btn {
   display: inline-flex;

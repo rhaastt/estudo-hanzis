@@ -3,48 +3,93 @@ import {
   resendConfirmation, onAuthChange, getSession,
 } from './auth.js';
 import { passwordStrength, MIN_PASSWORD_LENGTH } from '../core/password.js';
+import { supabase } from './supabase.js';
+import * as baralhosStore from './baralhos-store.js';
 
-const modal       = document.getElementById('authModal');
-const backdrop    = document.getElementById('authModalBackdrop');
-const closeBtn    = document.getElementById('authModalClose');
-const form        = document.getElementById('authForm');
-const nomeInput   = document.getElementById('authNome');
-const emailInput  = document.getElementById('authEmail');
-const passInput   = document.getElementById('authPassword');
-const pass2Input  = document.getElementById('authPassword2');
-const toggleBtn   = document.getElementById('authToggle');
-const submitBtn   = document.getElementById('authSubmit');
-const msgEl       = document.getElementById('authMsg');
-const tabs        = document.querySelectorAll('.auth-tab');
-const googleBtn   = document.getElementById('authGoogle');
-const strengthBox = document.getElementById('authStrength');
+// ── Refs do modal ──────────────────────────────────────────
+const modal         = document.getElementById('authModal');
+const backdrop      = document.getElementById('authModalBackdrop');
+const closeBtn      = document.getElementById('authModalClose');
+const form          = document.getElementById('authForm');
+const nomeInput     = document.getElementById('authNome');
+const emailInput    = document.getElementById('authEmail');
+const passInput     = document.getElementById('authPassword');
+const pass2Input    = document.getElementById('authPassword2');
+const toggleBtn     = document.getElementById('authToggle');
+const submitBtn     = document.getElementById('authSubmit');
+const msgEl         = document.getElementById('authMsg');
+const tabs          = document.querySelectorAll('.auth-tab');
+const googleBtn     = document.getElementById('authGoogle');
 const strengthFill  = document.getElementById('authStrengthFill');
 const strengthLabel = document.getElementById('authStrengthLabel');
 const signupFields  = document.querySelectorAll('.auth-field--signup');
-const sentDiv     = document.getElementById('authSent');
-const sentEmail   = document.getElementById('authSentEmail');
-const resendBtn   = document.getElementById('authResend');
-const loggedDiv   = document.getElementById('authLogged');
-const loggedName  = document.getElementById('authLoggedName');
-const loggedEmail = document.getElementById('authLoggedEmail');
-const signOutBtn  = document.getElementById('authSignOut');
-const authBtn     = document.getElementById('authBtn');
-const authLabel   = document.getElementById('authLabel');
+const sentDiv       = document.getElementById('authSent');
+const sentEmail     = document.getElementById('authSentEmail');
+const resendBtn     = document.getElementById('authResend');
+const authTabsEl    = document.querySelector('.auth-tabs');
+const dividerEl     = document.querySelector('.auth-divider');
 
-let activeTab = 'login'; // 'login' | 'signup'
+// ── Refs do painel de perfil ───────────────────────────────
+const profilePane     = document.getElementById('authProfile');
+const profileAvatar   = document.getElementById('authProfileAvatar');
+const profileNameEl   = document.getElementById('authProfileName');
+const profileEmailEl  = document.getElementById('authProfileEmail');
+const profileStats    = document.getElementById('authProfileStats');
+const profileNomeInput = document.getElementById('profileNomeInput');
+const profileSaveBtn  = document.getElementById('profileSaveBtn');
+const profileMsg      = document.getElementById('profileMsg');
+const profileSignOut  = document.getElementById('profileSignOutBtn');
+
+// ── Refs do avatar/dropdown na tab bar ────────────────────
+const authBtn         = document.getElementById('authBtn');
+const avatarWrap      = document.getElementById('userAvatarWrap');
+const avatarBtn       = document.getElementById('userAvatarBtn');
+const avatarImg       = document.getElementById('userAvatarImg');
+const avatarInitials  = document.getElementById('userAvatarInitials');
+const dropdown        = document.getElementById('userDropdown');
+const dropdownName    = document.getElementById('userDropdownName');
+const dropdownEmail   = document.getElementById('userDropdownEmail');
+const dropdownProfile = document.getElementById('userProfileBtn');
+const dropdownSignOut = document.getElementById('userSignOutBtn');
+
+// ── Refs de personalização ────────────────────────────────
+const heroSubtitle    = document.getElementById('heroSubtitle');
+
+let activeTab    = 'login';
 let pendingEmail = '';
+let currentSession = null;
 
-function openModal() {
+// ── Utilitários ────────────────────────────────────────────
+
+function initials(nome, email) {
+  if (nome) {
+    const parts = nome.trim().split(/\s+/);
+    return parts.length >= 2
+      ? parts[0][0] + parts[parts.length - 1][0]
+      : parts[0].slice(0, 2);
+  }
+  return (email || '?')[0];
+}
+
+function primeiroNome(nome, email) {
+  if (nome) return nome.trim().split(/\s+/)[0];
+  return email?.split('@')[0] ?? '';
+}
+
+// ── Abertura / fechamento do modal ────────────────────────
+
+function openModal(view = 'form') {
+  showView(view);
   modal.hidden = false;
   document.body.classList.add('auth-modal-open');
-  emailInput.focus();
+  if (view === 'form') emailInput.focus();
+  if (view === 'profile') profileNomeInput.focus();
 }
 
 function closeModal() {
   modal.hidden = true;
   document.body.classList.remove('auth-modal-open');
   clearMsg();
-  showView('form');
 }
 
 function setMsg(text, isOk = false) {
@@ -54,16 +99,18 @@ function setMsg(text, isOk = false) {
 
 function clearMsg() { msgEl.textContent = ''; }
 
-// Alterna entre formulário, tela "e-mail enviado" e estado logado
 function showView(view) {
-  form.hidden     = view !== 'form';
-  sentDiv.hidden  = view !== 'sent';
-  loggedDiv.hidden = view !== 'logged';
-  const showTabs = view === 'form';
-  document.querySelector('.auth-tabs').hidden = !showTabs;
-  googleBtn.hidden = !showTabs;
-  document.querySelector('.auth-divider').hidden = !showTabs;
+  form.hidden        = view !== 'form';
+  sentDiv.hidden     = view !== 'sent';
+  profilePane.hidden = view !== 'profile';
+  const isForm = view === 'form';
+  authTabsEl.hidden = !isForm;
+  googleBtn.hidden  = !isForm;
+  dividerEl.hidden  = !isForm;
+  if (view === 'profile') renderProfile();
 }
+
+// ── Tab login/cadastro ────────────────────────────────────
 
 function setTab(tab) {
   activeTab = tab;
@@ -83,35 +130,107 @@ function updateStrength() {
   strengthLabel.textContent = passInput.value ? label : '';
 }
 
-function updateAuthBtn(session) {
-  if (session) {
-    const meta = session.user.user_metadata || {};
-    const nome = meta.nome || session.user.email.split('@')[0];
-    authBtn.classList.add('logged');
-    authLabel.textContent = nome;
-    loggedName.textContent = meta.nome || '';
-    loggedName.hidden = !meta.nome;
-    loggedEmail.textContent = session.user.email;
-    showView('logged');
-  } else {
-    authBtn.classList.remove('logged');
-    authLabel.textContent = 'Entrar';
-    if (sentDiv.hidden) showView('form');
+// ── Dropdown do avatar ────────────────────────────────────
+
+function openDropdown() {
+  dropdown.hidden = false;
+  avatarBtn.setAttribute('aria-expanded', 'true');
+}
+
+function closeDropdown() {
+  dropdown.hidden = true;
+  avatarBtn.setAttribute('aria-expanded', 'false');
+}
+
+// ── Personalização da UI ──────────────────────────────────
+
+function updatePersonalization(session) {
+  if (!session) {
+    heroSubtitle.textContent = '72 caracteres · Guia de estudo + Flash Cards interativos';
+    return;
   }
+  const meta  = session.user.user_metadata || {};
+  const nome  = meta.full_name || meta.nome || null;
+  const first = primeiroNome(nome, session.user.email);
+  heroSubtitle.textContent = `Bem-vindo de volta, ${first} · 72 caracteres`;
+}
+
+// ── Avatar na tab bar ─────────────────────────────────────
+
+function updateAvatarBar(session) {
+  if (!session) {
+    authBtn.hidden    = false;
+    avatarWrap.hidden = true;
+    return;
+  }
+  const meta   = session.user.user_metadata || {};
+  const nome   = meta.full_name || meta.nome || null;
+  const email  = session.user.email;
+  const pic    = meta.avatar_url || meta.picture || null;
+
+  authBtn.hidden    = true;
+  avatarWrap.hidden = false;
+
+  if (pic) {
+    avatarImg.src    = pic;
+    avatarImg.hidden = false;
+    avatarInitials.textContent = '';
+  } else {
+    avatarImg.hidden = true;
+    avatarInitials.textContent = initials(nome, email);
+  }
+
+  dropdownName.textContent  = nome || primeiroNome(null, email);
+  dropdownEmail.textContent = email;
+
+  updatePersonalization(session);
+}
+
+// ── Painel de perfil ──────────────────────────────────────
+
+function renderProfile() {
+  if (!currentSession) return;
+  const meta  = currentSession.user.user_metadata || {};
+  const nome  = meta.full_name || meta.nome || '';
+  const email = currentSession.user.email;
+  const pic   = meta.avatar_url || meta.picture || null;
+
+  profileNameEl.textContent  = nome || primeiroNome(null, email);
+  profileEmailEl.textContent = email;
+  profileNomeInput.value     = nome;
+  profileMsg.textContent     = '';
+
+  if (pic) {
+    profileAvatar.innerHTML = `<img src="${pic}" alt="${nome}">`;
+  } else {
+    profileAvatar.textContent = initials(nome, email);
+  }
+
+  // estatísticas: baralhos e itens marcados
+  const bs      = baralhosStore.getBaralhos();
+  const total   = bs.reduce((s, b) => s + b.ids.length, 0);
+  profileStats.innerHTML = `
+    <div class="auth-stat">
+      <span class="auth-stat-value">${bs.length}</span>
+      <span class="auth-stat-label">Baralhos</span>
+    </div>
+    <div class="auth-stat">
+      <span class="auth-stat-value">${total}</span>
+      <span class="auth-stat-label">Itens marcados</span>
+    </div>`;
+  if (window.lucide) window.lucide.createIcons({ attrs: { class: ['lucide'] } });
 }
 
 // ── Eventos ───────────────────────────────────────────────
 
-authBtn.addEventListener('click', openModal);
+authBtn.addEventListener('click', () => openModal('form'));
 backdrop.addEventListener('click', closeModal);
 closeBtn.addEventListener('click', closeModal);
-
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !modal.hidden) closeModal();
 });
 
 tabs.forEach(t => t.addEventListener('click', () => setTab(t.dataset.authTab)));
-
 passInput.addEventListener('input', () => { if (activeTab === 'signup') updateStrength(); });
 
 toggleBtn.addEventListener('click', () => {
@@ -124,11 +243,7 @@ toggleBtn.addEventListener('click', () => {
 
 googleBtn.addEventListener('click', async () => {
   clearMsg();
-  try {
-    await signInWithGoogle();
-  } catch (err) {
-    setMsg(traduzirErro(err.message));
-  }
+  try { await signInWithGoogle(); } catch (err) { setMsg(traduzirErro(err.message)); }
 });
 
 form.addEventListener('submit', async e => {
@@ -137,7 +252,6 @@ form.addEventListener('submit', async e => {
   const email    = emailInput.value.trim();
   const password = passInput.value;
 
-  // Validação extra no cadastro
   if (activeTab === 'signup') {
     if (!passwordStrength(password).valid) {
       setMsg(`A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
@@ -181,15 +295,63 @@ resendBtn.addEventListener('click', async () => {
   }
 });
 
-signOutBtn.addEventListener('click', async () => {
+// Avatar dropdown
+avatarBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  dropdown.hidden ? openDropdown() : closeDropdown();
+});
+
+document.addEventListener('click', e => {
+  if (!avatarWrap.contains(e.target)) closeDropdown();
+});
+
+dropdownProfile.addEventListener('click', () => {
+  closeDropdown();
+  openModal('profile');
+});
+
+dropdownSignOut.addEventListener('click', async () => {
+  closeDropdown();
   await signOut();
+});
+
+// Painel de perfil
+profileSaveBtn.addEventListener('click', async () => {
+  const nome = profileNomeInput.value.trim();
+  profileSaveBtn.disabled = true;
+  try {
+    const { error } = await supabase.auth.updateUser({ data: { nome } });
+    if (error) throw error;
+    profileMsg.className = 'auth-msg auth-msg--ok';
+    profileMsg.textContent = 'Nome atualizado!';
+    // atualiza sessão local
+    const { data } = await supabase.auth.getSession();
+    if (data.session) updateAvatarBar(data.session);
+  } catch (err) {
+    profileMsg.className = 'auth-msg';
+    profileMsg.textContent = traduzirErro(err.message);
+  } finally {
+    profileSaveBtn.disabled = false;
+  }
+});
+
+profileSignOut.addEventListener('click', async () => {
   closeModal();
+  await signOut();
 });
 
 // ── Auth state ────────────────────────────────────────────
 
-onAuthChange(session => updateAuthBtn(session));
-getSession().then(session => updateAuthBtn(session));
+onAuthChange(session => {
+  currentSession = session;
+  updateAvatarBar(session);
+  if (!session) closeDropdown();
+});
+
+getSession().then(session => {
+  currentSession = session;
+  updateAvatarBar(session);
+});
 
 // ── Helpers ───────────────────────────────────────────────
 
