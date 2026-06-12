@@ -2,6 +2,7 @@
   @media (max-width: 600px) {
     .hero { padding: 60px 20px 40px; }
     .guide-wrap, .flashcards-wrap, .quiz-wrap, .paises-wrap { padding: 0 20px 60px; }
+    footer { padding: 0 20px 32px; }
     .tabs { display: none; }
     .hanzi-table { display: block; overflow-x: auto; }
     .fc-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
@@ -100,7 +101,7 @@
 
     .tabs {
       flex-wrap: wrap;
-      padding: 0 28px 28px;
+      padding: 14px 28px 24px;
     }
 
     .guide-wrap,
