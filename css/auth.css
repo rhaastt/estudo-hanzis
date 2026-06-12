@@ -106,12 +106,191 @@ body.auth-modal-open { overflow: hidden; }
 
 .auth-tab.active { color: var(--text); border-bottom-color: var(--text); }
 
+.auth-tabs[hidden] { display: none; }
+
+/* ── BOTÃO GOOGLE ────────────────────────────────────────── */
+.auth-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  border: 1.5px solid rgba(0,0,0,0.14);
+  border-radius: 12px;
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.auth-google:hover { background: var(--bg); border-color: rgba(0,0,0,0.28); }
+.auth-google[hidden] { display: none; }
+.auth-google-icon { flex-shrink: 0; }
+
+/* ── DIVISOR ──────────────────────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 4px;
+  color: var(--subtle);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0,0,0,0.1);
+}
+
+.auth-divider[hidden] { display: none; }
+
 /* ── FORMULÁRIO ──────────────────────────────────────────── */
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
+.auth-field { display: flex; flex-direction: column; gap: 6px; }
+.auth-field[hidden] { display: none; }
+
+/* ── INPUT COM TOGGLE DE SENHA ───────────────────────────── */
+.auth-input-wrap { position: relative; }
+
+.auth-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  color: var(--subtle);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.auth-toggle:hover { color: var(--text); background: rgba(0,0,0,0.05); }
+.auth-toggle i { width: 17px; height: 17px; }
+
+/* ── MEDIDOR DE FORÇA ────────────────────────────────────── */
+.auth-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.auth-strength[hidden] { display: none; }
+
+.auth-strength-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.auth-strength-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  transition: width 0.25s, background 0.25s;
+}
+
+.auth-strength-bar span[data-score="0"],
+.auth-strength-bar span[data-score="1"] { background: #C04040; }
+.auth-strength-bar span[data-score="2"] { background: #D89020; }
+.auth-strength-bar span[data-score="3"] { background: #7AA22A; }
+.auth-strength-bar span[data-score="4"] { background: #2A7A3A; }
+
+.auth-strength-label {
+  font-size: 11px;
+  color: var(--subtle);
+  min-width: 64px;
+}
+
+/* ── ESTADO LOADING DO BOTÃO ─────────────────────────────── */
+.auth-submit.loading { color: transparent; position: relative; }
+
+.auth-submit.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: authSpin 0.6s linear infinite;
+}
+
+@keyframes authSpin { to { transform: rotate(360deg); } }
+
+/* ── TELA "E-MAIL ENVIADO" ───────────────────────────────── */
+.auth-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 12px 4px;
+}
+
+.auth-sent[hidden] { display: none; }
+.auth-sent-icon { width: 40px; height: 40px; color: #2A7A3A; }
+
+.auth-sent-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.auth-sent-text {
+  font-size: 13px;
+  color: var(--subtle);
+  line-height: 1.5;
+}
+
+.auth-link {
+  border: none;
+  background: none;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.auth-link:disabled { color: var(--subtle); cursor: default; text-decoration: none; }
+
+.auth-logged-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+}
+
+.auth-logged-name[hidden] { display: none; }
 
 .auth-label {
   font-family: 'DM Sans', sans-serif;

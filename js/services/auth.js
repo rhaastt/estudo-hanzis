@@ -18,10 +18,27 @@ export async function signInWithEmail(email, password) {
   return data.user;
 }
 
-export async function signUpWithEmail(email, password) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+export async function signUpWithEmail(email, password, nome) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { nome: nome?.trim() || null } },
+  });
   if (error) throw error;
   return data.user;
+}
+
+export async function resendConfirmation(email) {
+  const { error } = await supabase.auth.resend({ type: 'signup', email });
+  if (error) throw error;
+}
+
+export async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  });
+  if (error) throw error;
 }
 
 export async function signOut() {
