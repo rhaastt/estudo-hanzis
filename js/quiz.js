@@ -91,21 +91,35 @@ function renderDeckRow() {
   }
 
   row.hidden = false;
-  row.innerHTML = `
-    <span class="quiz-settings-label">Baralho</span>
-    <div class="quiz-deck-pills">
-      <button class="quiz-deck-pill${!state.deckId ? ' active' : ''}" data-deck="">Nenhum</button>
-      ${baralhos.map(b => `<button class="quiz-deck-pill${state.deckId === b.id ? ' active' : ''}${b.ids.length === 0 ? ' quiz-deck-pill--dim' : ''}" data-deck="${b.id}">${b.nome} <span class="quiz-deck-pill-count">${b.ids.length}</span></button>`).join('')}
-    </div>`;
+  row.innerHTML = `<span class="quiz-settings-label">Baralho</span>`;
+  const pillsWrap = document.createElement('div');
+  pillsWrap.className = 'quiz-deck-pills';
 
-  row.querySelectorAll('.quiz-deck-pill').forEach(btn =>
+  const makePill = (label, deckId, active, dim, count) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-deck-pill' + (active ? ' active' : '') + (dim ? ' quiz-deck-pill--dim' : '');
+    btn.dataset.deck = deckId;
+    btn.textContent = label;
+    if (count != null) {
+      const countEl = document.createElement('span');
+      countEl.className = 'quiz-deck-pill-count';
+      countEl.textContent = count;
+      btn.appendChild(countEl);
+    }
     btn.addEventListener('click', () => {
       state.deckId = btn.dataset.deck || null;
       renderDeckRow();
       updateCountButtons();
       saveSettings();
-    })
-  );
+    });
+    return btn;
+  };
+
+  pillsWrap.appendChild(makePill('Nenhum', '', !state.deckId, false, null));
+  for (const b of baralhos) {
+    pillsWrap.appendChild(makePill(b.nome, b.id, state.deckId === b.id, b.ids.length === 0, b.ids.length));
+  }
+  row.appendChild(pillsWrap);
 
   updateCategoryIgnored();
 }
