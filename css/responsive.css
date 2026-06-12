@@ -6,7 +6,7 @@
     .tabs { display: none; }
     .hanzi-table { display: block; overflow-x: auto; }
     .fc-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-    .quiz-opts { grid-template-columns: 1fr; }
+    .quiz-opts { grid-template-columns: 1fr; gap: 8px; }
     .country-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 
     body { padding-bottom: 76px; }

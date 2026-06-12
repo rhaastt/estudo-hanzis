@@ -60,3 +60,9 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
+
+  /* ── Animação compartilhada (usada por cards, modais, grupos) ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }

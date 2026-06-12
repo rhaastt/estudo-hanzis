@@ -123,12 +123,7 @@
   .t4 { background: #E8D8FF; color: #6030A0; }
   .tn { background: #E0E0E0; color: #606060; }
 
-  /* ===================== ANIMATIONS ===================== */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
+  /* ===================== ANIMATIONS (fadeUp em base.css) ===================== */
   .group:nth-child(1)  { animation-delay: 0.05s }
   .group:nth-child(2)  { animation-delay: 0.10s }
   .group:nth-child(3)  { animation-delay: 0.15s }
