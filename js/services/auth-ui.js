@@ -35,6 +35,7 @@ const profileAvatar   = document.getElementById('authProfileAvatar');
 const profileNameEl   = document.getElementById('authProfileName');
 const profileEmailEl  = document.getElementById('authProfileEmail');
 const profileStats    = document.getElementById('authProfileStats');
+const profileProvider = document.getElementById('authProfileProvider');
 const profileNomeInput = document.getElementById('profileNomeInput');
 const profileSaveBtn  = document.getElementById('profileSaveBtn');
 const profileMsg      = document.getElementById('profileMsg');
@@ -65,6 +66,7 @@ const heroSubtitle    = document.getElementById('heroSubtitle');
 let activeTab    = 'login';
 let pendingEmail = '';
 let currentSession = null;
+let originalNome = '';
 
 // ── Utilitários ────────────────────────────────────────────
 
@@ -233,6 +235,8 @@ function renderProfile() {
   profileEmailEl.textContent = email;
   profileNomeInput.value     = nome;
   profileMsg.textContent     = '';
+  originalNome = nome;
+  syncSaveState();
 
   if (pic) {
     profileAvatar.innerHTML = `<img src="${pic}" alt="${nome}">`;
@@ -240,19 +244,37 @@ function renderProfile() {
     profileAvatar.textContent = initials(nome, email);
   }
 
+  // badge do provedor de login
+  const provider = (currentSession.user.app_metadata || {}).provider || 'email';
+  if (provider === 'google') {
+    profileProvider.innerHTML = '<i data-lucide="check-circle"></i> Conectado com Google';
+    profileProvider.hidden = false;
+  } else {
+    profileProvider.innerHTML = '<i data-lucide="mail"></i> Conta por e-mail';
+    profileProvider.hidden = false;
+  }
+
   // estatísticas: baralhos e itens marcados
-  const bs      = baralhosStore.getBaralhos();
-  const total   = bs.reduce((s, b) => s + b.ids.length, 0);
+  const bs    = baralhosStore.getBaralhos();
+  const total = bs.reduce((s, b) => s + b.ids.length, 0);
   profileStats.innerHTML = `
     <div class="auth-stat">
+      <i data-lucide="layers" class="auth-stat-icon"></i>
       <span class="auth-stat-value">${bs.length}</span>
       <span class="auth-stat-label">Baralhos</span>
     </div>
     <div class="auth-stat">
+      <i data-lucide="star" class="auth-stat-icon"></i>
       <span class="auth-stat-value">${total}</span>
       <span class="auth-stat-label">Itens marcados</span>
     </div>`;
-  if (window.lucide) window.lucide.createIcons({ attrs: { class: ['lucide'] } });
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// Ativa o botão Salvar apenas quando o nome muda e não está vazio
+function syncSaveState() {
+  const val = profileNomeInput.value.trim();
+  profileSaveBtn.disabled = (val === originalNome.trim() || val === '');
 }
 
 // ── Eventos ───────────────────────────────────────────────
@@ -355,22 +377,30 @@ dropdownSignOut.addEventListener('click', async () => {
 });
 
 // Painel de perfil
+profileNomeInput.addEventListener('input', () => {
+  profileMsg.textContent = '';
+  syncSaveState();
+});
+
 profileSaveBtn.addEventListener('click', async () => {
   const nome = profileNomeInput.value.trim();
   profileSaveBtn.disabled = true;
+  profileSaveBtn.textContent = 'Salvando…';
   try {
     const { error } = await supabase.auth.updateUser({ data: { nome } });
     if (error) throw error;
+    originalNome = nome;
     profileMsg.className = 'auth-msg auth-msg--ok';
-    profileMsg.textContent = 'Nome atualizado!';
-    // atualiza sessão local
+    profileMsg.textContent = 'Nome atualizado ✓';
+    profileNameEl.textContent = nome || primeiroNome(null, currentSession.user.email);
     const { data } = await supabase.auth.getSession();
-    if (data.session) updateAvatarBar(data.session);
+    if (data.session) { currentSession = data.session; updateAvatarBar(data.session); }
   } catch (err) {
     profileMsg.className = 'auth-msg';
     profileMsg.textContent = traduzirErro(err.message);
   } finally {
-    profileSaveBtn.disabled = false;
+    profileSaveBtn.textContent = 'Salvar';
+    syncSaveState();
   }
 });
 
