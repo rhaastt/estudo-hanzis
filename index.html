@@ -189,21 +189,18 @@
         <p class="auth-profile-email" id="authProfileEmail"></p>
       </div>
       <div class="auth-profile-stats" id="authProfileStats"></div>
-      <div class="auth-profile-section">
-        <p class="auth-profile-section-title">Editar nome</p>
-        <div class="auth-input-wrap" style="margin-top:6px">
+      <div class="auth-profile-field">
+        <label class="auth-label" for="profileNomeInput">Nome de exibição</label>
+        <div class="auth-profile-name-row">
           <input class="auth-input" id="profileNomeInput" type="text" maxlength="60"
                  placeholder="Seu nome">
+          <button class="auth-profile-save" id="profileSaveBtn" type="button">Salvar</button>
         </div>
-        <button class="auth-submit" id="profileSaveBtn" type="button"
-                style="margin-top:10px">Salvar nome</button>
         <p class="auth-msg" id="profileMsg"></p>
       </div>
-      <div class="auth-profile-section">
-        <button class="auth-submit auth-submit--outline" id="profileSignOutBtn" type="button">
-          Sair da conta
-        </button>
-      </div>
+      <button class="auth-profile-signout" id="profileSignOutBtn" type="button">
+        <i data-lucide="log-out"></i> Sair da conta
+      </button>
     </div>
   </div>
 </div>
