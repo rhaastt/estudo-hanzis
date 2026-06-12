@@ -263,7 +263,7 @@
   gap: 5px;
 }
 
-.quiz-deck-pill:hover { border-color: #8A7868; color: var(--text); }
+.quiz-deck-pill:hover { border-color: var(--accent-hover); color: var(--text); }
 
 .quiz-deck-pill.active {
   background: var(--text);

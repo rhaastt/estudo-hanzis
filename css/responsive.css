@@ -93,3 +93,27 @@
 
     .mobile-nav-btn--auth.logged { color: var(--text); }
   }
+
+  /* ===================== TABLET (601px–1024px) ===================== */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    .hero { padding: 48px 28px 36px; }
+
+    .tabs {
+      flex-wrap: wrap;
+      padding: 0 28px 28px;
+    }
+
+    .guide-wrap,
+    .flashcards-wrap,
+    .quiz-wrap,
+    .paises-wrap { padding: 0 28px 64px; }
+
+    .fc-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+
+    .quiz-modes-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+
+    .country-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+
+    /* tabela do guia ganha scroll horizontal nessa faixa */
+    .hanzi-table { display: block; overflow-x: auto; }
+  }
