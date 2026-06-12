@@ -183,13 +183,20 @@
 
     <!-- painel de perfil (visível quando logado e modal aberto via "Perfil") -->
     <div class="auth-profile" id="authProfile" hidden>
+      <!-- Hero horizontal: avatar + identidade -->
       <div class="auth-profile-hero">
         <div class="auth-profile-avatar" id="authProfileAvatar"></div>
-        <p class="auth-profile-name" id="authProfileName"></p>
-        <p class="auth-profile-email" id="authProfileEmail"></p>
-        <span class="auth-profile-provider" id="authProfileProvider" hidden></span>
+        <div class="auth-profile-identity">
+          <p class="auth-profile-name" id="authProfileName"></p>
+          <p class="auth-profile-email" id="authProfileEmail"></p>
+          <span class="auth-profile-provider" id="authProfileProvider" hidden></span>
+        </div>
       </div>
+
+      <!-- Estatísticas -->
       <div class="auth-profile-stats" id="authProfileStats"></div>
+
+      <!-- Editar nome -->
       <div class="auth-profile-field">
         <label class="auth-label" for="profileNomeInput">Nome de exibição</label>
         <div class="auth-profile-name-row">
@@ -199,9 +206,13 @@
         </div>
         <p class="auth-msg" id="profileMsg"></p>
       </div>
-      <button class="auth-profile-signout" id="profileSignOutBtn" type="button">
-        <i data-lucide="log-out"></i> Sair da conta
-      </button>
+
+      <!-- Ações -->
+      <div class="auth-profile-actions">
+        <button class="auth-profile-signout" id="profileSignOutBtn" type="button">
+          <i data-lucide="log-out"></i> Sair da conta
+        </button>
+      </div>
     </div>
   </div>
 </div>

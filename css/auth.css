@@ -104,33 +104,33 @@
 .user-dropdown-item--danger:hover { background: #FFF0F0; }
 
 /* ── PAINEL DE PERFIL (dentro do modal) ──────────────────── */
-.auth-profile { display: flex; flex-direction: column; gap: 22px; }
+.auth-profile { display: flex; flex-direction: column; gap: 20px; }
 .auth-profile[hidden] { display: none; }
 
+/* hero horizontal: avatar à esquerda, identidade à direita */
 .auth-profile-hero {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 16px;
+  padding: 4px 0 8px;
 }
 
 .auth-profile-avatar {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'DM Sans', sans-serif;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 600;
   color: #fff;
   text-transform: uppercase;
   overflow: hidden;
   flex-shrink: 0;
-  margin-bottom: 4px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
 }
 
 .auth-profile-avatar img {
@@ -140,43 +140,54 @@
   border-radius: 50%;
 }
 
+.auth-profile-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .auth-profile-name {
   font-family: 'DM Serif Display', serif;
-  font-size: 24px;
-  line-height: 1.1;
+  font-size: 20px;
+  line-height: 1.15;
   color: var(--text);
-  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .auth-profile-email {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--subtle);
-  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* badge do provedor de login */
 .auth-profile-provider {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   margin-top: 4px;
-  padding: 4px 11px;
+  padding: 3px 9px;
   border-radius: 999px;
   background: var(--bg);
   font-size: 11px;
   font-weight: 500;
   color: var(--subtle);
   letter-spacing: 0.02em;
+  align-self: flex-start;
 }
 
 .auth-profile-provider[hidden] { display: none; }
-.auth-profile-provider i { width: 13px; height: 13px; color: #3E9E5E; }
+.auth-profile-provider i { width: 12px; height: 12px; color: #3E9E5E; }
 
 /* estatísticas */
 .auth-profile-stats {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  gap: 8px;
 }
 
 .auth-stat {
@@ -191,15 +202,15 @@
 }
 
 .auth-stat-icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   color: var(--accent);
   margin-bottom: 2px;
 }
 
 .auth-stat-value {
   font-family: 'DM Serif Display', serif;
-  font-size: 26px;
+  font-size: 24px;
   color: var(--text);
   line-height: 1;
 }
@@ -217,8 +228,9 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(0,0,0,0.07);
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 16px;
 }
 
 .auth-profile-name-row {
@@ -227,11 +239,14 @@
   align-items: stretch;
 }
 
-.auth-profile-name-row .auth-input { flex: 1; }
+.auth-profile-name-row .auth-input {
+  flex: 1;
+  background: #fff;
+}
 
 .auth-profile-save {
   flex-shrink: 0;
-  padding: 0 18px;
+  padding: 0 16px;
   border: none;
   border-radius: 12px;
   background: var(--text);
@@ -244,29 +259,33 @@
 }
 
 .auth-profile-save:hover { background: #000; }
-.auth-profile-save:disabled { opacity: 0.5; cursor: default; }
+.auth-profile-save:disabled { opacity: 0.38; cursor: default; }
 
-/* sair — ação discreta no rodapé */
+/* rodapé com sair */
+.auth-profile-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
 .auth-profile-signout {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 7px;
-  align-self: center;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border: none;
   background: none;
-  color: #C04040;
+  color: var(--subtle);
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   border-radius: 999px;
-  transition: background 0.15s;
+  transition: color 0.15s, background 0.15s;
 }
 
-.auth-profile-signout:hover { background: #FFF0F0; }
-.auth-profile-signout i { width: 15px; height: 15px; }
+.auth-profile-signout:hover { color: #C04040; background: #FFF0F0; }
+.auth-profile-signout i { width: 14px; height: 14px; }
 
 /* ── BOTÃO DE AUTH NA BARRA DE TABS ──────────────────────── */
 .tab-auth-btn {
@@ -331,6 +350,11 @@ body.auth-modal-open { overflow: hidden; }
   padding: 32px 28px 28px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24);
   animation: fadeUp 0.25s ease;
+  transition: max-width 0.2s ease;
+}
+
+.auth-modal-card--profile {
+  max-width: 400px;
 }
 
 .auth-modal-close {

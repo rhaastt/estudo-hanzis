@@ -116,6 +116,7 @@ function showView(view) {
   authTabsEl.hidden = !isForm;
   googleBtn.hidden  = !isForm;
   dividerEl.hidden  = !isForm;
+  modal.querySelector('.auth-modal-card').classList.toggle('auth-modal-card--profile', view === 'profile');
   if (view === 'profile') renderProfile();
 }
 
