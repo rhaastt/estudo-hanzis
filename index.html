@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/modals.css">
   <link rel="stylesheet" href="css/baralhos.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
 
@@ -28,6 +29,10 @@
   <button class="tab-btn" data-tab="guia">Guia de Estudo</button>
   <button class="tab-btn" data-tab="quiz">Quiz</button>
   <button class="tab-btn" data-tab="paises">Países</button>
+  <button class="tab-auth-btn" id="authBtn" aria-label="Entrar">
+    <i data-lucide="user"></i>
+    <span class="tab-auth-label" id="authLabel">Entrar</span>
+  </button>
   <button class="tab-search-btn" id="globalSearchBtn" aria-label="Buscar">
     <i data-lucide="search"></i>
     <span class="tab-search-hint">Ctrl K</span>
@@ -80,6 +85,34 @@
     <div class="cmdk-footer">
       <span><kbd>enter</kbd> abrir</span>
       <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL DE AUTH ──────────────────────────────────────── -->
+<div class="auth-modal" id="authModal" hidden>
+  <div class="auth-modal-backdrop" id="authModalBackdrop"></div>
+  <div class="auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <button class="auth-modal-close" type="button" id="authModalClose" aria-label="Fechar">
+      <i data-lucide="x"></i>
+    </button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-tab="login" type="button">Entrar</button>
+      <button class="auth-tab" data-auth-tab="signup" type="button">Criar conta</button>
+    </div>
+    <form class="auth-form" id="authForm" autocomplete="on">
+      <label class="auth-label" for="authEmail">E-mail</label>
+      <input class="auth-input" id="authEmail" type="email" name="email"
+             placeholder="seu@email.com" required autocomplete="email">
+      <label class="auth-label" for="authPassword">Senha</label>
+      <input class="auth-input" id="authPassword" type="password" name="password"
+             placeholder="••••••••" required autocomplete="current-password" minlength="6">
+      <p class="auth-msg" id="authMsg"></p>
+      <button class="auth-submit" id="authSubmit" type="submit">Entrar</button>
+    </form>
+    <div class="auth-logged" id="authLogged" hidden>
+      <p class="auth-logged-email" id="authLoggedEmail"></p>
+      <button class="auth-submit auth-submit--outline" id="authSignOut" type="button">Sair</button>
     </div>
   </div>
 </div>

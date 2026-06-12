@@ -1,0 +1,193 @@
+/* ── BOTÃO DE AUTH NA BARRA DE TABS ──────────────────────── */
+.tab-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--subtle);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.tab-auth-btn i { width: 16px; height: 16px; }
+
+.tab-auth-btn:hover { color: var(--text); background: rgba(0,0,0,0.05); }
+
+.tab-auth-btn.logged {
+  color: var(--text);
+  background: rgba(0,0,0,0.06);
+}
+
+/* ── MODAL DE AUTH ────────────────────────────────────────── */
+body.auth-modal-open { overflow: hidden; }
+
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-modal[hidden] { display: none; }
+
+.auth-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 28, 26, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.auth-modal-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 360px;
+  background: #fff;
+  border-radius: var(--card-radius);
+  padding: 32px 28px 28px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24);
+  animation: fadeUp 0.25s ease;
+}
+
+.auth-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--subtle);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.auth-modal-close:hover { color: var(--text); background: #ECE8E0; }
+.auth-modal-close i { width: 18px; height: 18px; }
+
+/* ── TABS ────────────────────────────────────────────────── */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--subtle);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.auth-tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+/* ── FORMULÁRIO ──────────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--subtle);
+  margin-top: 8px;
+}
+
+.auth-input {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  padding: 11px 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.auth-input:focus { border-color: var(--text); }
+
+.auth-msg {
+  min-height: 18px;
+  font-size: 12px;
+  color: #C04040;
+  margin: 2px 0 0;
+}
+
+.auth-msg--ok { color: #2A7A3A; }
+
+.auth-submit {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--text);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.auth-submit:hover { background: #000; }
+.auth-submit:active { transform: scale(0.97); }
+.auth-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.auth-submit--outline {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid rgba(0,0,0,0.18);
+}
+
+.auth-submit--outline:hover { background: rgba(0,0,0,0.04); }
+
+/* ── ESTADO LOGADO ───────────────────────────────────────── */
+.auth-logged {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.auth-logged[hidden] { display: none; }
+
+.auth-logged-email {
+  font-size: 14px;
+  color: var(--subtle);
+  text-align: center;
+  word-break: break-all;
+}

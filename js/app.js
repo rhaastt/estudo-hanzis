@@ -1,3 +1,4 @@
+import './services/auth-ui.js';
 import { categories, hanziList } from './data/catalog.js';
 import { countryList } from './data/countries.js';
 import {
