@@ -52,6 +52,13 @@ const dropdownEmail   = document.getElementById('userDropdownEmail');
 const dropdownProfile = document.getElementById('userProfileBtn');
 const dropdownSignOut = document.getElementById('userSignOutBtn');
 
+// ── Refs nav mobile ───────────────────────────────────────
+const mobileAuthBtn     = document.getElementById('mobileAuthBtn');
+const mobileNavAvatar   = document.getElementById('mobileNavAvatar');
+const mobileNavAvatarImg = document.getElementById('mobileNavAvatarImg');
+const mobileNavUserIcon = document.getElementById('mobileNavUserIcon');
+const mobileAuthLabel   = document.getElementById('mobileAuthLabel');
+
 // ── Refs de personalização ────────────────────────────────
 const heroSubtitle    = document.getElementById('heroSubtitle');
 
@@ -184,6 +191,33 @@ function updateAvatarBar(session) {
   dropdownEmail.textContent = email;
 
   updatePersonalization(session);
+  updateMobileNav(session);
+}
+
+function updateMobileNav(session) {
+  if (!session) {
+    mobileAuthBtn.classList.remove('logged');
+    mobileNavAvatarImg.hidden = true;
+    mobileNavUserIcon.hidden  = false;
+    mobileAuthLabel.textContent = 'Entrar';
+    return;
+  }
+  const meta  = session.user.user_metadata || {};
+  const nome  = meta.full_name || meta.nome || null;
+  const pic   = meta.avatar_url || meta.picture || null;
+  const first = primeiroNome(nome, session.user.email);
+
+  mobileAuthBtn.classList.add('logged');
+  mobileAuthLabel.textContent = first;
+
+  if (pic) {
+    mobileNavAvatarImg.src    = pic;
+    mobileNavAvatarImg.hidden = false;
+    mobileNavUserIcon.hidden  = true;
+  } else {
+    mobileNavAvatarImg.hidden = true;
+    mobileNavUserIcon.hidden  = false;
+  }
 }
 
 // ── Painel de perfil ──────────────────────────────────────
@@ -295,6 +329,11 @@ resendBtn.addEventListener('click', async () => {
   }
 });
 
+// Mobile auth button
+mobileAuthBtn.addEventListener('click', () => {
+  openModal(currentSession ? 'profile' : 'form');
+});
+
 // Avatar dropdown
 avatarBtn.addEventListener('click', e => {
   e.stopPropagation();
@@ -345,12 +384,14 @@ profileSignOut.addEventListener('click', async () => {
 onAuthChange(session => {
   currentSession = session;
   updateAvatarBar(session);
+  updateMobileNav(session);
   if (!session) closeDropdown();
 });
 
 getSession().then(session => {
   currentSession = session;
   updateAvatarBar(session);
+  updateMobileNav(session);
 });
 
 // ── Helpers ───────────────────────────────────────────────
